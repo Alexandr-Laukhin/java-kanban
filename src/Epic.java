@@ -10,8 +10,8 @@ public class Epic extends Task {
     }
 
     public void createSubTask(String subTaskName, String subTaskDescription) {
-        subTask = new SubTask(subTaskName, subTaskDescription);         // // создаем подзадачу
-        subTasks.add(subTask);                                          // // добавляем ее к списку подзадач конкретного эпика
+        subTask = new SubTask(subTaskName, subTaskDescription);
+        subTasks.add(subTask);                                         
 
         System.out.println("Подзадача добавлена.");
     }

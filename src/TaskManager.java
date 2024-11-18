@@ -64,7 +64,7 @@ public class TaskManager {
     private void updateStatus(int i) {
         if (tasks.get(i).getClass() == Epic.class) {
             System.out.println("Вы не можете изменить статус данной задачи. Он изменится автоматически, " +
-                    "при изменении статуса подзадач.");                                                          // в самом классе также переопределил setStatus() на всякий
+                    "при изменении статуса подзадач.");
         } else {
             System.out.println("Выберите новый статус:");
             System.out.println("1. IN_PROGRESS");
@@ -100,7 +100,7 @@ public class TaskManager {
 
     public void printAllTasks() {
         for (Task value : tasks) {
-            System.out.println(value.getName() + ". Номер задачи: " + value.getNumber() + ". Статус задачи: " + value.getStatus() + "." + value.getDescription());           // убрать вызов описания!!!
+            System.out.println(value.getName() + ". Номер задачи: " + value.getNumber() + ". Статус задачи: " + value.getStatus() + ".");
         }
         if (tasks.isEmpty()) {
             System.out.println("Список пуст.");
