@@ -1,25 +1,13 @@
 import java.util.ArrayList;
 
 public class Epic extends Task {
+    ArrayList<Integer> subTasksID = new ArrayList<>();
 
-    ArrayList<SubTask> subTasks = new ArrayList<>();
-    SubTask subTask;
-
-    public Epic(String name, String description) {
-        super(name, description);
+    public Epic(String name, String description, int counter) {
+        super(name, description, counter);
     }
 
-    public void createSubTask(String subTaskName, String subTaskDescription) {
-        subTask = new SubTask(subTaskName, subTaskDescription);
-        subTasks.add(subTask);                                         
-
-        System.out.println("Подзадача добавлена.");
+    public ArrayList<Integer> getSubTasksID() {
+        return subTasksID;
     }
-
-    public void printThisEpicSubTasks() {
-        for (SubTask task : subTasks) {
-            System.out.println(task.getName() + ". Номер подзадачи: " + task.getNumber() + ". Статус подзадачи: " + task.getStatus() + ".");
-        }
-    }
-
 }

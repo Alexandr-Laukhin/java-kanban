@@ -1,13 +1,17 @@
+import java.util.Objects;
+
 public class Task {
 
     private String name;
     private String description;
     private Status status = Status.NEW;
-    private final int number = (int) (Math.round(Math.random() * 1000000));
+    private final int ID;
 
-    public Task(String name, String description) {
+
+    public Task(String name, String description, int counter) {
         this.name = name;
         this.description = description;
+        this.ID = counter;
     }
 
     public String getName() {
@@ -34,8 +38,20 @@ public class Task {
         this.status = status;
     }
 
-    public int getNumber() {
-        return number;
+    public int getID() {
+        return ID;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Task task = (Task) object;
+        return ID == task.ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(ID);
+    }
 }
