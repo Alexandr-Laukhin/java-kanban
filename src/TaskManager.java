@@ -1,61 +1,59 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 public class TaskManager {
 
-    HashMap<Integer, Task> tasks = new HashMap<>();
-    HashMap<Integer, Epic> epics = new HashMap<>();
-    HashMap<Integer, SubTask> subTasks = new HashMap<>();
-    HashMap<Integer, Task> allTasks = new HashMap<>();
+    private HashMap<Integer, Task> tasks = new HashMap<>();
+    private HashMap<Integer, Epic> epics = new HashMap<>();
+    private HashMap<Integer, SubTask> subTasks = new HashMap<>();
 
-    private static int counter = 0;
-
-    Task task;
-    Epic epic;
-    SubTask subTask;
+    private int counter = 0;
 
 
-    public void createTask(String name, String description) {           // тут видел твой комментарий, что в параметрах должен передаваться сам объект, но не понял, что имелось ввиду. если я сделал неправильно, поясни, пожалуйста.
+    public void createTask(Task task) {
         counter++;
-        task = new Task(name, description, counter);
+        task.setId(counter);
         tasks.put(counter, task);
     }
 
-    public void createEpic(String name, String description) {
+    public void createEpic(Epic epic) {
         counter++;
-        epic = new Epic(name, description, counter);
+        epic.setId(counter);
         epics.put(counter, epic);
     }
 
-    public void createSubTask(String name, String description, int parentID) {
+    public void createSubTask(SubTask subTask, int parentId) {
         counter++;
-        subTask = new SubTask(name, description, counter, parentID);
+        subTask.setId(counter);
+        subTask.setParentID(parentId);
         subTasks.put(counter, subTask);
-        epics.get(parentID).subTasksID.add(counter);
+        epics.get(parentId).getSubTasksID().add(counter);
+        checkEpicStatus(subTask.getParentID());
     }
 
-    public HashMap<Integer, Task> getTasks() {
-        return tasks;
+    public ArrayList<Task> getTasks() {
+        return new ArrayList<>(tasks.values());
     }
 
-    public HashMap<Integer, Epic> getEpics() {
-        return epics;
+    public ArrayList<Epic> getEpics() {
+        return new ArrayList<>(epics.values());
     }
 
-    public HashMap<Integer, SubTask> getSubTasks() {
-        return subTasks;
+    public ArrayList<SubTask> getSubTasks() {
+        return new ArrayList<>(subTasks.values());
     }
 
-    public HashMap<Integer, Task> getAllTasks() {
-        allTasks.putAll(tasks);
-        allTasks.putAll(epics);
-        allTasks.putAll(subTasks);
-        return allTasks;
-    }
+    public ArrayList<SubTask> getSubTasksFromEpicByID(int epicID) {
 
-    public ArrayList<Integer> getSubTasksFromEpicByID(int epicID) {
-        return epics.get(epicID).subTasksID;
+        ArrayList<SubTask> subTasksInEpic = new ArrayList<>();
 
+        for (int i = 0; i < epics.get(epicID).getSubTasksID().size(); i++) {  // здесь мы проходимся по списку ИД подзадач в конкретном эпике
+            if (subTasks.containsKey(epics.get(epicID).getSubTasksID().get(i))) {
+                subTasksInEpic.add(subTasks.get(epics.get(epicID).getSubTasksID().get(i)));
+            }
+        }
+        return subTasksInEpic;
     }
 
     public void deleteTasks() {
@@ -64,22 +62,14 @@ public class TaskManager {
 
     public void deleteEpics() {
         epics.clear();
+        subTasks.clear();
     }
 
     public void deleteSubTasks() {
         subTasks.clear();
-    }
-
-    public void deleteAll() {
-        tasks.clear();
-        epics.clear();
-        subTasks.clear();
-        allTasks.clear();
-    }
-
-    public void deleteAllSubTasksFromEpic(int epicID) {
-        for (int i = 0; i < epics.get(epicID).subTasksID.size(); i++) {
-            subTasks.remove(epics.get(epicID).subTasksID.get(i));
+        for (int i = 0; i < epics.size(); i++) {
+            epics.get(i).getSubTasksID().clear();
+            checkEpicStatus(epics.get(i).getId());
         }
     }
 
@@ -89,10 +79,23 @@ public class TaskManager {
 
     public void deleteEpicByID(int epicID) {
         epics.remove(epicID);
+        for (int i = 0; i < subTasks.size(); i++) {
+            if (epicID == subTasks.get(i).getParentID()) {
+                subTasks.remove(i);
+            }
+        }
     }
 
     public void deleteSubTaskByID(int subTaskID) {
         subTasks.remove(subTaskID);
+        for (int i = 0; i < epics.size(); i++) {
+            for (int j = 0; j < epics.get(i).getSubTasksID().size(); j++) {
+                if (subTaskID == epics.get(i).getSubTasksID().get(j)) {
+                    epics.get(i).getSubTasksID().remove(j);
+                    checkEpicStatus(epics.get(i).getId());
+                }
+            }
+        }
     }
 
     public Task getTaskByID(int taskID) {
@@ -107,40 +110,36 @@ public class TaskManager {
         return subTasks.get(subTaskID);
     }
 
-    public Task updateTask(int taskID, String name, String description, Status status) {
-        tasks.get(taskID).setName(name);
-        tasks.get(taskID).setDescription(description);
-        tasks.get(taskID).setStatus(status);
-
-        return tasks.get(taskID);
+    public void updateTask(Task task, int taskForUpdateId) {
+        task.setId(taskForUpdateId);
+        tasks.replace(taskForUpdateId, tasks.get(taskForUpdateId), task);
     }
 
-    public Task updateEpic(int epicID, String name, String description) {
-        epics.get(epicID).setName(name);
-        epics.get(epicID).setDescription(description);
-        checkEpicStatus(epicID);
-
-        return epics.get(epicID);
+    public void updateEpic(Epic epic, int epicForUdateId) {
+        epic.setId(epicForUdateId);
+        epic.setSubTasksID(epics.get(epicForUdateId).getSubTasksID());
+        epics.replace(epicForUdateId, epics.get(epicForUdateId), epic);
     }
 
-    public void checkEpicStatus(int epicID) {
-        for (int i = 0; i < epics.get(epicID).subTasksID.size(); i++) {
-            if (subTasks.get(epics.get(epicID).subTasksID.get(i)).getStatus().equals(Status.IN_PROGRESS)) {
+    private void checkEpicStatus(int epicID) {                                                     // Тут не понял ошибку, все проверил несколько раз, в упор не вижу. По умолчанию, при создании эпика, у него статус NEW.
+                                                                                                   // Далее мы проверяем все его подзадачи на статусы, и если хоть одна из них IN_PROGRESS, мы останавливаем цикл, и
+                                                                                                   // присваиваем эпику статус IN_PROGRESS, так как дальше идти смысла нет. Если статус всех подзадач DONE, то и эпик будет DONE.
+                                                                                                   // Если же все статусы подзадач NEW, то ничего не изменится, эпик останется NEW. Покажи, пожалуйста, где косяк в логике.
+        for (int i = 0; i < epics.get(epicID).getSubTasksID().size(); i++) {
+            if (subTasks.get(epics.get(epicID).getSubTasksID().get(i)).getStatus().equals(Status.IN_PROGRESS)) {
                 epics.get(epicID).setStatus(Status.IN_PROGRESS);
                 break;
-            } else if (subTasks.get(epics.get(epicID).subTasksID.get(i)).getStatus().equals(Status.DONE)) {
+            } else if (subTasks.get(epics.get(epicID).getSubTasksID().get(i)).getStatus().equals(Status.DONE)) {
                 epics.get(epicID).setStatus(Status.DONE);
             }
         }
     }
 
-    public SubTask updateSubTask(int subTaskID, String name, String description, Status status) {
-        subTasks.get(subTaskID).setName(name);
-        subTasks.get(subTaskID).setDescription(description);
-        subTasks.get(subTaskID).setStatus(status);
-        checkEpicStatus(subTasks.get(subTaskID).getParentID());
-
-        return subTasks.get(subTaskID);
+    public void updateSubTask(SubTask subTask, int subTaskForUpdateId) {
+        subTask.setId(subTaskForUpdateId);
+        subTask.setParentID(subTasks.get(subTaskForUpdateId).getParentID());
+        subTasks.replace(subTaskForUpdateId, subTasks.get(subTaskForUpdateId), subTask);
+        checkEpicStatus(subTask.getParentID());
     }
 
 }
