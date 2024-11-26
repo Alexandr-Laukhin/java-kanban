@@ -1,3 +1,5 @@
+package classes;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -14,6 +16,10 @@ public class Epic extends Task {
 
     public void setSubTasksID(ArrayList<Integer> subTasksID) {
         this.subTasksID = subTasksID;
+    }
+
+    public void addSubTaskToList(int subTaskId) {
+        subTasksID.add(subTaskId);
     }
 
 }
