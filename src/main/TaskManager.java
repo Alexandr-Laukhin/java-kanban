@@ -1,8 +1,12 @@
 package main;
 
+import classes.Epic;
+import classes.Status;
+import classes.SubTask;
+import classes.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import classes.*;
 
 
 public class TaskManager {
@@ -30,9 +34,10 @@ public class TaskManager {
         counter++;
         subTask.setId(counter);
         subTasks.put(counter, subTask);
-        if (epics.containsKey(subTask.getParentID())) {
-            epics.get(subTask.getParentID()).getSubTasksID().add(counter);
-            //    epics.get(subTask.getParentID()).addSubTaskToList(counter);   // тут сделал через метод, как ты сказал, но не понял в чем разница. и так, и так одинаково громоздко (хотя это мое субъективное мнение, конечно)
+        Epic epic = epics.get(subTask.getParentID());
+
+        if (epics.containsKey(subTask.getParentID()) && epic != null) {
+            epic.addSubTaskToList(counter);
             checkEpicStatus(subTask.getParentID());
         }
     }
@@ -69,13 +74,12 @@ public class TaskManager {
     }
 
     public void deleteSubTasks() {
-        ArrayList<Integer> epicsKeys = new ArrayList<>(epics.keySet());
         subTasks.clear();
-        for (int i = 0; i < epicsKeys.size(); i++) {
-            epics.get(epicsKeys.get(i)).getSubTasksID().clear();
-            checkEpicStatus(epics.get(epicsKeys.get(i)).getId());
+        for (Epic epic : epics.values()) {
+            epic.getSubTasksID().clear();
+            checkEpicStatus(epic.getId());
         }
-    }  // спасибо, что обратил внимание, я действительно не подумал об этой очевидной (как мне сейчас кажется) вещи, что стандартный цикл для хешмапы не подойдет
+    }
 
     public void deleteTaskByID(int taskID) {
         tasks.remove(taskID);
@@ -84,8 +88,8 @@ public class TaskManager {
     public void deleteEpicByID(int epicID) {
         ArrayList<Integer> epicSubtasksId = new ArrayList<>(epics.get(epicID).getSubTasksID());
 
-        for (int i = 0; i < epicSubtasksId.size(); i++) {
-            subTasks.remove(epicSubtasksId.get(i));
+        for (Integer integer : epicSubtasksId) {
+            subTasks.remove(integer);
         }
         epics.remove(epicID);
     }
@@ -121,22 +125,25 @@ public class TaskManager {
     }
 
     private void checkEpicStatus(int epicID) {
-        if (epics.get(epicID).getSubTasksID().isEmpty()) {
+
+        Epic checkEpic = epics.get(epicID);
+
+        if (checkEpic.getSubTasksID().isEmpty()) {
             epics.get(epicID).setStatus(Status.NEW);
         } else {
-            ArrayList<Integer> subTasksIdList = new ArrayList<>(epics.get(epicID).getSubTasksID());
+            ArrayList<Integer> subTasksIdList = new ArrayList<>(checkEpic.getSubTasksID());
             ArrayList<Status> subTasksStatusList = new ArrayList<>();
 
-            for (int i = 0; i < subTasksIdList.size(); i++) {
-                subTasksStatusList.add(subTasks.get(subTasksIdList.get(i)).getStatus());
+            for (Integer integer : subTasksIdList) {
+                subTasksStatusList.add(subTasks.get(integer).getStatus());
             }
 
             if (!subTasksStatusList.contains(Status.IN_PROGRESS) && !subTasksStatusList.contains(Status.DONE)) {
-                epics.get(epicID).setStatus(Status.NEW);
+                checkEpic.setStatus(Status.NEW);
             } else if (!subTasksStatusList.contains(Status.IN_PROGRESS) && !subTasksStatusList.contains(Status.NEW)) {
-                epics.get(epicID).setStatus(Status.DONE);
+                checkEpic.setStatus(Status.DONE);
             } else {
-                epics.get(epicID).setStatus(Status.IN_PROGRESS);
+                checkEpic.setStatus(Status.IN_PROGRESS);
             }
         }
     }
