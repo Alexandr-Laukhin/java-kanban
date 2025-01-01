@@ -1,11 +1,14 @@
 import classes.*;
 import classes.Status;
+import main.InMemoryHistoryManager;
+import main.InMemoryTaskManager;
 import main.TaskManager;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
 
         Epic epic1 = new Epic("Test", "Test description");
@@ -51,7 +54,20 @@ public class Main {
 //        taskManager.deleteSubTaskByID(2);
 //        taskManager.deleteSubTaskByID(3);
 
-        taskManager.deleteSubTasks();
+        //taskManager.deleteSubTasks();
+
+        taskManager.getEpicByID(1);
+        taskManager.getSubTaskByID(2);
+        taskManager.getSubTaskByID(3);
+        taskManager.getSubTaskByID(4);
+        taskManager.getHistory();
+        taskManager.getSubTaskByID(2);
+        taskManager.getSubTaskByID(2);
+        taskManager.getSubTaskByID(2);
+        taskManager.getSubTaskByID(2);
+        historyManager.getHistory();
+
+
 
 
     }
