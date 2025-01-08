@@ -7,11 +7,11 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    List<? extends Task> history = new ArrayList<>();
+    List<Task> history = new ArrayList<>();
 
 
     @Override
-    public List<? extends Task> getHistory() {
+    public List<Task> getHistory() {
         for (Task task : history) {
             System.out.println(task.getName());
         }

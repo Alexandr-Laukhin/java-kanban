@@ -8,10 +8,9 @@ public class Main {
 
     public static void main(String[] args) {
         InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
 
-        Epic epic1 = new Epic("Test", "Test description");
+        Epic epic1 = new Epic("Test epic", "Test description");
         Epic epic12 = new Epic("Test 12", "Test description 12");
         SubTask subTask1 = new SubTask("test subtask 1", "test subtask description 1", 1);
         SubTask subTask2 = new SubTask("test subtask 2", "test subtask description 2", 1);
@@ -55,17 +54,20 @@ public class Main {
 //        taskManager.deleteSubTaskByID(3);
 
         //taskManager.deleteSubTasks();
+        Task taskTest = new Task("Test task", "Test Task Description");
+        taskManager.createTask(taskTest);
+        taskManager.getTaskByID(8);
 
         taskManager.getEpicByID(1);
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(3);
         taskManager.getSubTaskByID(4);
-        taskManager.getHistory();
+        taskManager.historyManager.getHistory();
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(2);
-        historyManager.getHistory();
+        taskManager.historyManager.getHistory();
 
 
 

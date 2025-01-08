@@ -17,7 +17,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int counter = 0;
 
-    InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
+    public InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
 
 
