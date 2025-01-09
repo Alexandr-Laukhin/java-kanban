@@ -1,9 +1,6 @@
 package main;
 
-import classes.Epic;
-import classes.Status;
-import classes.SubTask;
-import classes.Task;
+import classes.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,12 +11,8 @@ public class InMemoryTaskManager implements TaskManager {
     private HashMap<Integer, Task> tasks = new HashMap<>();
     private HashMap<Integer, Epic> epics = new HashMap<>();
     private HashMap<Integer, SubTask> subTasks = new HashMap<>();
-
     private int counter = 0;
-
-    public InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
-
-
+    public InMemoryHistoryManager historyManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
 
     @Override
     public void createTask(Task task) {
@@ -121,20 +114,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskByID(int taskID) {
-        historyManager.add(tasks.get(taskID));
-        return tasks.get(taskID);
-    }
+        Task task = tasks.get(taskID);
+        historyManager.add(task);
+        return task;
+    } // В таком ключе я, как обычно, не подумал. Спасибо, что обратил на это внимание, двойные обращения к хешмапам
+                                              // действительно менее аккуратно выглядят, и систему, как я понимаю, будут нагружать больше.
 
     @Override
     public Epic getEpicByID(int epicID) {
-        historyManager.add(epics.get(epicID));
-        return epics.get(epicID);
+        Epic epic = epics.get(epicID);
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
     public SubTask getSubTaskByID(int subTaskID) {
-        historyManager.add(subTasks.get(subTaskID));
-        return subTasks.get(subTaskID);
+        SubTask subTask = subTasks.get(subTaskID);
+        historyManager.add(subTask);
+        return subTask;
     }
 
     @Override
@@ -177,6 +174,5 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
     }
-
 
 }

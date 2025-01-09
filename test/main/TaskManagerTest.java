@@ -2,15 +2,46 @@ package main;
 
 import classes.*;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+class TaskManagerTest {
 
-class DeleteTest {
+    private InMemoryTaskManager testTaskManager;
+
+    @BeforeEach
+    void createTestTaskManager() {
+        testTaskManager = new InMemoryTaskManager();
+    }
+
+    @Test
+    void createTaskTest() {
+        Task testTask = new Task("Test task", "Test Task Description");
+        testTaskManager.createTask(testTask);
+
+        Assertions.assertEquals(testTask, testTaskManager.getTaskByID(1));
+    }
+
+    @Test
+    void createEpic() {
+        Epic testEpic = new Epic("Test epic", "Test Epic Description");
+        testTaskManager.createEpic(testEpic);
+
+        Assertions.assertEquals(testEpic, testTaskManager.getEpicByID(1));
+    }
+
+    @Test
+    void createSubTask() {
+        Epic testEpic = new Epic("Test epic", "Test Epic Description");
+        testTaskManager.createEpic(testEpic);
+        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 1);
+        testTaskManager.createSubTask(testSubTask);
+
+        Assertions.assertEquals(testSubTask, testTaskManager.getSubTaskByID(2));
+    }
 
     @Test
     void deleteTasks() {
-        InMemoryTaskManager testTaskManager = new InMemoryTaskManager();
         Task testTask = new Task("Test task", "Test Task Description");
         Task testTask2 = new Task("Test task2", "Test Task Description2");
         testTaskManager.createTask(testTask);
@@ -22,7 +53,6 @@ class DeleteTest {
 
     @Test
     void deleteEpics() {
-        InMemoryTaskManager testTaskManager = new InMemoryTaskManager();
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
         testTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 1);
@@ -43,7 +73,6 @@ class DeleteTest {
 
     @Test
     void deleteSubTasks() {
-        InMemoryTaskManager testTaskManager = new InMemoryTaskManager();
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
         testTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 1);
@@ -57,7 +86,6 @@ class DeleteTest {
 
     @Test
     void deleteTaskByID() {
-        InMemoryTaskManager testTaskManager = new InMemoryTaskManager();
         Task testTask = new Task("Test task", "Test Task Description");
         testTaskManager.createTask(testTask);
         testTaskManager.deleteTaskByID(1);
@@ -67,7 +95,6 @@ class DeleteTest {
 
     @Test
     void deleteEpicByID() {
-        InMemoryTaskManager testTaskManager = new InMemoryTaskManager();
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
         testTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 1);
@@ -80,7 +107,6 @@ class DeleteTest {
 
     @Test
     void deleteSubTaskByID() {
-        InMemoryTaskManager testTaskManager = new InMemoryTaskManager();
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
         testTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 1);
@@ -89,4 +115,37 @@ class DeleteTest {
 
         Assertions.assertNull(testTaskManager.getSubTaskByID(2));
     }
+
+    @Test
+    void updateTask() {
+        String expectedName = "Updated Test task";
+        Task testTask = new Task("Test task", "Test Task Description");
+        testTaskManager.createTask(testTask);
+        testTask.setName("Updated Test task");
+
+        Assertions.assertEquals(expectedName, testTaskManager.getTaskByID(1).getName());
+    }
+
+    @Test
+    void updateEpic() {
+        String expectedName = "Updated Test Epic";
+        Epic testEpic = new Epic("Test epic", "Test Epic Description");
+        testTaskManager.createEpic(testEpic);
+        testEpic.setName("Updated Test Epic");
+
+        Assertions.assertEquals(expectedName, testTaskManager.getEpicByID(1).getName());
+    }
+
+    @Test
+    void updateSubTask() {
+        String expectedName = "Updated Test SubTask";
+        Epic testEpic = new Epic("Test epic", "Test Epic Description");
+        testTaskManager.createEpic(testEpic);
+        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 1);
+        testTaskManager.createSubTask(testSubTask);
+        testSubTask.setName("Updated Test SubTask");
+
+        Assertions.assertEquals(expectedName, testTaskManager.getSubTaskByID(2).getName());
+    }
+
 }

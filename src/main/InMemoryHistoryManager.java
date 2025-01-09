@@ -7,25 +7,23 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    List<Task> history = new ArrayList<>();
-
+    private List<Task> history = new ArrayList<>();
 
     @Override
     public List<Task> getHistory() {
-        for (Task task : history) {
-            System.out.println(task.getName());
-        }
-        return history;
+        return new ArrayList<>(history);
     }
 
     @Override
-    public <T extends Task> void add(T task) {
+    public void add(Task task) {
+        if (task != null) {
             if (history.size() >= 10) {
                 history.removeFirst();
             }
             history.add(task);
         }
     }
+}
 
 
 
