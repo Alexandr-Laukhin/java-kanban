@@ -14,7 +14,7 @@ class HistoryTest {
     private TaskManager testTaskManager;
 
     @BeforeEach
-    void createTestTaskManager() {
+    void createTestManagers() {
         historyManager = Managers.getDefaultHistory();
         testTaskManager = Managers.getDefault();
         testTask = new Task("Test task", "Test Task Description");
@@ -37,5 +37,8 @@ class HistoryTest {
 
         assertEquals(10, historyManager.getHistory().size());
     }
+
+    // Честно говоря, не очень понял, что тут имелось ввиду, даже после твоих пояснений в пачке, но все модификаторы
+    // доступа выставил private, и постарался убрать testTaskManager откуда смог его убрать. Вроде теперь все должно быть правильно.
 
 }
