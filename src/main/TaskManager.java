@@ -5,6 +5,7 @@ import classes.SubTask;
 import classes.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
 
@@ -21,6 +22,8 @@ public interface TaskManager {
     ArrayList<SubTask> getSubTasks();
 
     ArrayList<SubTask> getSubTasksFromEpicByID(int epicID);
+
+    List<Task> getHistory();
 
     void deleteTasks();
 

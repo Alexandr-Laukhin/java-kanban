@@ -62,12 +62,12 @@ public class Main {
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(3);
         taskManager.getSubTaskByID(4);
-        taskManager.historyManager.getHistory();
+        taskManager.getHistory();
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(2);
         taskManager.getSubTaskByID(2);
-        taskManager.historyManager.getHistory();
+        taskManager.getHistory();
 
 
 

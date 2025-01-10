@@ -4,6 +4,7 @@ import classes.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -12,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     private HashMap<Integer, Epic> epics = new HashMap<>();
     private HashMap<Integer, SubTask> subTasks = new HashMap<>();
     private int counter = 0;
-    public InMemoryHistoryManager historyManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
+    private HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
     public void createTask(Task task) {
@@ -68,6 +69,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
+    @Override
     public void deleteTasks() {
         tasks.clear();
     }
@@ -118,7 +124,7 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.add(task);
         return task;
     } // В таком ключе я, как обычно, не подумал. Спасибо, что обратил на это внимание, двойные обращения к хешмапам
-                                              // действительно менее аккуратно выглядят, и систему, как я понимаю, будут нагружать больше.
+    // действительно менее аккуратно выглядят, и систему, как я понимаю, будут нагружать больше.
 
     @Override
     public Epic getEpicByID(int epicID) {
@@ -174,5 +180,6 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
     }
+
 
 }
