@@ -18,27 +18,22 @@ class HistoryTest {
         historyManager = Managers.getDefaultHistory();
         testTaskManager = Managers.getDefault();
         testTask = new Task("Test task", "Test Task Description");
-        testTaskManager.createTask(testTask);
     }
 
     @Test
     void add() {
-        testTaskManager.getTaskByID(1);
+        historyManager.add(testTask);
 
-        assertNotNull(historyManager.getHistory());
+        assertEquals(1, historyManager.getHistory().size());
     }
 
     @Test
     void historyArrayListShouldNotBeMoreThanTen() {
         for (int i = 1; i < 12; i++) {
-            testTaskManager.createTask(testTask);
             historyManager.add(testTask);
         }
 
         assertEquals(10, historyManager.getHistory().size());
     }
-
-    // Честно говоря, не очень понял, что тут имелось ввиду, даже после твоих пояснений в пачке, но все модификаторы
-    // доступа выставил private, и постарался убрать testTaskManager откуда смог его убрать. Вроде теперь все должно быть правильно.
 
 }

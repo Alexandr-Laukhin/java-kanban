@@ -5,40 +5,41 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class TaskManagerTest {
 
     private TaskManager testTaskManager;
     private Task testTask;
+    private Epic testEpic;
+    private SubTask testSubTask;
+
 
     @BeforeEach
     void createTestTaskManager() {
         testTaskManager = Managers.getDefault();
         testTask = new Task("Test task", "Test Task Description");
         testTaskManager.createTask(testTask);
-    }  // Я вынес сюда создание задачи, но тут же еще создание,
-    // обновление и удаление и эпиков и сабтасок. Может тогда было бы лучше еще разделить файлы тестов на тесты для тасок, сабтасок и эпиков?
+        testEpic = new Epic("Test epic", "Test Epic Description");
+        testTaskManager.createEpic(testEpic);
+        testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
+        testTaskManager.createSubTask(testSubTask);
+    }
 
     @Test
     void createTaskTest() {
-        Assertions.assertEquals(testTask, testTaskManager.getTaskByID(1));
+        assertEquals(testTask, testTaskManager.getTaskByID(1));
     }
 
     @Test
     void createEpic() {
-        Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
-
-        Assertions.assertEquals(testEpic, testTaskManager.getEpicByID(2));
+        assertEquals(testEpic, testTaskManager.getEpicByID(2));
     }
 
     @Test
     void createSubTask() {
-        Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
-        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
-        testTaskManager.createSubTask(testSubTask);
-
-        Assertions.assertEquals(testSubTask, testTaskManager.getSubTaskByID(3));
+        assertEquals(testSubTask, testTaskManager.getSubTaskByID(3));
     }
 
     @Test
@@ -52,11 +53,6 @@ class TaskManagerTest {
 
     @Test
     void deleteEpics() {
-        Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
-        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
-        testTaskManager.createSubTask(testSubTask);
-
         Epic testEpic2 = new Epic("Test epic2", "Test Epic Description2");
         testTaskManager.createEpic(testEpic2);
         SubTask testSubTask2 = new SubTask("Test subTask2", "Test SubTask Description2", 4);
@@ -72,11 +68,7 @@ class TaskManagerTest {
 
     @Test
     void deleteSubTasks() {
-        Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
-        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
         SubTask testSubTask2 = new SubTask("Test subTask2", "Test SubTask Description2", 2);
-        testTaskManager.createSubTask(testSubTask);
         testTaskManager.createSubTask(testSubTask2);
         testTaskManager.deleteSubTasks();
 
@@ -118,29 +110,36 @@ class TaskManagerTest {
         String expectedName = "Updated Test task";
         testTask.setName("Updated Test task");
 
-        Assertions.assertEquals(expectedName, testTaskManager.getTaskByID(1).getName());
+        assertEquals(expectedName, testTaskManager.getTaskByID(1).getName());
     }
 
     @Test
     void updateEpic() {
         String expectedName = "Updated Test Epic";
-        Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
         testEpic.setName("Updated Test Epic");
 
-        Assertions.assertEquals(expectedName, testTaskManager.getEpicByID(2).getName());
+        assertEquals(expectedName, testTaskManager.getEpicByID(2).getName());
     }
 
     @Test
     void updateSubTask() {
         String expectedName = "Updated Test SubTask";
-        Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
-        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
-        testTaskManager.createSubTask(testSubTask);
         testSubTask.setName("Updated Test SubTask");
 
-        Assertions.assertEquals(expectedName, testTaskManager.getSubTaskByID(3).getName());
+        assertEquals(expectedName, testTaskManager.getSubTaskByID(3).getName());
+    }
+
+    @Test
+    void taskManagerLoadHistoryTest() {
+        assertNotNull(testTaskManager.getHistory());
+    }
+
+    @Test
+    void getSubTasksFromEpicByID() {
+        assertNotNull(testTaskManager.getSubTasksFromEpicByID(2));  // простой вариант, как с историей
+
+        assertEquals("Test subTask", testTaskManager.getSubTasksFromEpicByID(2).getFirst().getName());
+        // так мне показалось более точно и правильно, решил сделать 2 варианта
     }
 
 }
