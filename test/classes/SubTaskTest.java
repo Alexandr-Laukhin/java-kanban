@@ -9,10 +9,8 @@ class SubTaskTest {
 
     @Test
     void subtasksWithTheSameIdShouldBeEqual() {
-
-        TaskManager testTaskManager = Managers.getDefault();
         Epic testEpic = new Epic ("First epic", "First Description");
-        testTaskManager.createEpic(testEpic);
+        testEpic.setId(1);
         SubTask subTask = new SubTask("First subtask", "First subtask description", 1);
         SubTask subTask1 = new SubTask("Second subtask", "Second subtask description", 1);
 
