@@ -28,12 +28,19 @@ class HistoryTest {
     }
 
     @Test
-    void historyArrayListShouldNotBeMoreThanTen() {
-        for (int i = 1; i < 12; i++) {
-            historyManager.add(testTask);
-        }
+    void remove() {
+        historyManager.add(testTask);
+        historyManager.remove(0);
 
-        assertEquals(10, historyManager.getHistory().size());
+        assertTrue(historyManager.getHistory().isEmpty());
     }
 
+    @Test
+    void inHistoryShouldNotBeCopies() {
+        historyManager.add(testTask);
+        historyManager.add(testTask);
+        historyManager.add(testTask);
+
+        assertEquals(1, historyManager.getHistory().size());
+    }
 }
