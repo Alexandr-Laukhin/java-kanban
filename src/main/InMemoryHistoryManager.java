@@ -1,12 +1,8 @@
 package main;
 
-import classes.Node;
 import classes.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -16,57 +12,121 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node headOfList;
     private Node tailOfList;
 
+    private static class Node {
+        private Node prevTask;
+        private Node nextTask;
+        private Task thisTask;
+
+        public Node(Node tailOfList, Task thisTask, Node nextTask) {
+
+            this.thisTask = thisTask;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) return true;
+            if (object == null || getClass() != object.getClass()) return false;
+            Node node = (Node) object;
+            return Objects.equals(thisTask.getId(), node.thisTask.getId());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(thisTask.getId());
+        }
+    }
 
     public void linkLast(Task task) {
-        Node node = new Node(null, task, null);
-        if (linkedHistory.isEmpty()) {
-            linkedHistory.add(node);
+        Node node = new Node(tailOfList, task, null);
+
+        if (linkedHistory.isEmpty()) {  // проверка на пустой список
+            node.prevTask = null;
             headOfList = node;
             tailOfList = node;
         } else {
-            Node oldTail = tailOfList;
-            node.setPrevTask(oldTail);  // назначаю старый хвост предыдущим узлом нынешнего хвоста
-            oldTail.setNextTask(node);  // в старом хвосте указываю следующий узел как новый хвост
-            tailOfList = node;  // новый хвост теперь этот узел
-            if (linkedHistory.contains(node)) {  // проверка на повтор
-                linkedHistory.remove(node);
+            if (historyMap.containsKey(node.thisTask.getId())) {  // проверка на копии и их удаление из хэшмапы и связанного списка
+                removeNode(historyMap.get(node.thisTask.getId()));
             }
-            linkedHistory.add(node);
+            tailOfList.nextTask = node;   // сначала говорим, что следующая нода от хвоста - это нода
+            int prevId = tailOfList.thisTask.getId();
+            tailOfList = node;            // потом нода сама становится хвостом
+            tailOfList.prevTask = historyMap.get(prevId); // ставим связь с прошлой нодой
         }
-    }  // в этом методе комментарии для себя прописал, чтобы в будущем проще было разобраться. если ты не против, я бы их не удалял.
+
+        linkedHistory.add(tailOfList);      // потом добавляем ее в связанный список
+        historyMap.put(tailOfList.thisTask.getId(), tailOfList);  // потом добавляем ее в хешмапу
+    }
 
     public List<Node> getTasks() {
         return linkedHistory;
     }
 
     private void removeNode(Node node) {
-        linkedHistory.remove(node);
-    }
+        if (linkedHistory.size() == 1) {
+            if (linkedHistory.contains(node)) {
+                linkedHistory.clear();
+                historyMap.clear();
+                headOfList = null;
+                tailOfList = null;
+            }
+        } else if (node.thisTask.getId() == historyMap.get(headOfList.thisTask.getId()).thisTask.getId()) {            // если  id ноды совпадает с id head, и (пока удалил проверку предыдущего значения на ноль)
+            headOfList = historyMap.get(headOfList.nextTask.thisTask.getId());                                           // если мы удаляем head, то добываем id следующей ноды из хешмапы, и делаем эту ноду head
+            headOfList.prevTask = null;                                                                                  // далее обнуляем предыдущее значение у новой head
+            // historyMap.get(headOfList.nextTask.thisTask.getId()).prevTask = headOfList;                                  // далее добываем следующую ноду у head, и ставим head у нее как предыдущее значение
+            linkedHistory.remove(node);                                                                                      // удаляем ноду из связанного списка
+            historyMap.remove(node.thisTask.getId());
 
+        } else if (node.thisTask.getId() == historyMap.get(tailOfList.thisTask.getId()).thisTask.getId()) {
+            tailOfList = historyMap.get(tailOfList.prevTask.thisTask.getId());
+            tailOfList.nextTask = null;
+            historyMap.get(tailOfList.prevTask.thisTask.getId()).nextTask = tailOfList;
+            linkedHistory.remove(node);
+            historyMap.remove(node.thisTask.getId());
+
+        } else {
+            historyMap.get(node.nextTask.thisTask.getId()).prevTask = historyMap.get(node.prevTask.thisTask.getId());    // добываем у ноды id следующей, и у следующей назначаем предыдущее значение как у нынешней ноды.
+            historyMap.get(node.prevTask.thisTask.getId()).nextTask = historyMap.get(node.nextTask.thisTask.getId());    // тоже самое, только наоборот
+            linkedHistory.remove(node);
+            historyMap.get(node.thisTask.getId());
+
+        }
+    }
 
     @Override
     public List<Task> getHistory() {
-        ArrayList<Task> historyListFromLinkedHistory = new ArrayList<>();
-        for (Node node : linkedHistory) {
-            historyListFromLinkedHistory.add(node.getThisTask());
+
+        ArrayList<Task> historyListFromHistoryMap = new ArrayList<>();
+
+        if (!linkedHistory.isEmpty()) {
+            Node linkedTask = historyMap.get(headOfList.thisTask.getId());
+            historyListFromHistoryMap.add(linkedTask.thisTask);
+
+            while (linkedTask.nextTask != null) {    // linkedTask.thisTask.getId() != tailOfList.thisTask.getId()
+                linkedTask = historyMap.get(linkedTask.nextTask.thisTask.getId());
+                historyListFromHistoryMap.add(linkedTask.thisTask);
+            }
         }
-        return new ArrayList<>(historyListFromLinkedHistory);
+
+
+        return new ArrayList<>(historyListFromHistoryMap);
+
     }
 
     @Override
     public void add(Task task) {
         if (task != null) {
             linkLast(task);
-            historyMap.put(task.getId(), tailOfList);
         }
     }
 
     @Override
     public void remove(int id) {
-        linkedHistory.remove(historyMap.get(id));
-        historyMap.remove(id);
+        if (historyMap.containsKey(id)) {
+            removeNode(historyMap.get(id));
+            linkedHistory.remove(historyMap.get(id));
+            historyMap.remove(id);
+        }
     }
-
 }
 
 

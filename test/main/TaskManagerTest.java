@@ -25,6 +25,7 @@ class TaskManagerTest {
         testTaskManager.createEpic(testEpic);
         testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
         testTaskManager.createSubTask(testSubTask);
+
     }
 
     @Test
@@ -131,6 +132,7 @@ class TaskManagerTest {
 
     @Test
     void taskManagerLoadHistoryTest() {
+        testTaskManager.getTaskByID(1);
         assertNotNull(testTaskManager.getHistory());
     }
 

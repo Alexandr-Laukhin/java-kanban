@@ -39,17 +39,26 @@ public class Main {
         taskManager.getEpicByID(5);
         taskManager.getTaskByID(6);
 
-        taskManager.getHistory().stream().map(Task::getName).forEach(System.out::println);
+        for (Task task : taskManager.getHistory()) {
+            String name = task.getName();
+            System.out.println(name);
+        }
         System.out.println("-------------------------------");
 
         taskManager.deleteTaskByID(6);
 
-        taskManager.getHistory().stream().map(Task::getName).forEach(System.out::println);
+        for (Task task : taskManager.getHistory()) {
+            String name = task.getName();
+            System.out.println(name);
+        }
         System.out.println("-------------------------------");
 
         taskManager.deleteEpicByID(1);
 
-        taskManager.getHistory().stream().map(Task::getName).forEach(System.out::println);
+        for (Task task : taskManager.getHistory()) {
+            String name = task.getName();
+            System.out.println(name);
+        }
         System.out.println("-------------------------------");
 
         taskManager.deleteTaskByID(7);
