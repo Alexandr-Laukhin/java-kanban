@@ -8,8 +8,8 @@ class EpicTest {
 
     @Test
     void epicsWithTheSameIdShouldBeEqual() {
-        Epic testEpic = new Epic ("First epic", "First Description");
-        Epic testEpic1 = new Epic ("Second epic", "Second description");
+        Epic testEpic = new Epic("First epic", "First Description");
+        Epic testEpic1 = new Epic("Second epic", "Second description");
 
         assertEquals(testEpic, testEpic1);
     }

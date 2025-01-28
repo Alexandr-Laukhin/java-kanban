@@ -28,7 +28,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             node.setPrevTask(oldTail);  // назначаю старый хвост предыдущим узлом нынешнего хвоста
             oldTail.setNextTask(node);  // в старом хвосте указываю следующий узел как новый хвост
             tailOfList = node;  // новый хвост теперь этот узел
-            if(linkedHistory.contains(node)) {  // проверка на повтор
+            if (linkedHistory.contains(node)) {  // проверка на повтор
                 linkedHistory.remove(node);
             }
             linkedHistory.add(node);

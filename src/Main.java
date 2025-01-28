@@ -56,11 +56,6 @@ public class Main {
         taskManager.deleteEpicByID(5);
 
 
-
-
-
-
-
     }
 }
 
