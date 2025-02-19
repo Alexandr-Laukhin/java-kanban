@@ -2,9 +2,10 @@ package main;
 
 import classes.Managers;
 import classes.Task;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,13 +13,17 @@ class HistoryTest {
 
     private HistoryManager historyManager;
     private Task testTask;
-    private TaskManager testTaskManager;
+    private Task testTask2;
+    private Task testTask3;
 
     @BeforeEach
     void createTestManagers() {
         historyManager = Managers.getDefaultHistory();
-        testTaskManager = Managers.getDefault();
         testTask = new Task("Test task", "Test Task Description");
+        testTask2 = new Task("Test task2", "Test Task Description2");
+        testTask2.setId(1);
+        testTask3 = new Task("Test task3", "Test Task Description3");
+        testTask3.setId(2);
         historyManager.add(testTask);
     }
 
@@ -36,15 +41,17 @@ class HistoryTest {
 
     @Test
     void inHistoryShouldNotBeCopies() {
-        testTaskManager.getTaskByID(0);
-        testTaskManager.getTaskByID(0);
-        testTaskManager.getTaskByID(0);
+        historyManager.add(testTask);
+        historyManager.add(testTask);
+        historyManager.add(testTask);
+
         assertEquals(1, historyManager.getHistory().size());
     }
 
     @Test
     void deleteTheOnlyOneTaskFromHistory() {
-        testTaskManager.getTaskByID(0);
+        historyManager.add(testTask);
+
         historyManager.remove(0);
 
         assertEquals(0, historyManager.getHistory().size());
@@ -52,58 +59,35 @@ class HistoryTest {
 
     @Test
     void deleteTaskFromTheEndOfHistory() {
-        Task testTask2 = new Task("Test task2", "Test Task Description2");
-        Task testTask3 = new Task("Test task3", "Test Task Description3");
-        testTaskManager.createTask(testTask);
-        testTaskManager.createTask(testTask2);
-        testTaskManager.createTask(testTask3);
+        historyManager.add(testTask);
+        historyManager.add(testTask2);
+        historyManager.add(testTask3);
 
-        testTaskManager.getTaskByID(1);
-        testTaskManager.getTaskByID(2);
-        testTaskManager.getTaskByID(3);
+        historyManager.remove(2);
 
-        testTaskManager.deleteTaskByID(3);
-
-        Assertions.assertEquals(1,testTaskManager.getHistory().getFirst().getId());
-        Assertions.assertEquals(2,testTaskManager.getHistory().getLast().getId());
-
+        assertEquals(List.of(testTask, testTask2), historyManager.getHistory());
     }
 
     @Test
     void deleteTaskAtTheBeginning() {
-        Task testTask2 = new Task("Test task2", "Test Task Description2");
-        Task testTask3 = new Task("Test task3", "Test Task Description3");
-        testTaskManager.createTask(testTask);
-        testTaskManager.createTask(testTask2);
-        testTaskManager.createTask(testTask3);
+        historyManager.add(testTask);
+        historyManager.add(testTask2);
+        historyManager.add(testTask3);
 
-        testTaskManager.getTaskByID(1);
-        testTaskManager.getTaskByID(2);
-        testTaskManager.getTaskByID(3);
+        historyManager.remove(0);
 
-        testTaskManager.deleteTaskByID(1);
-
-        Assertions.assertEquals(2,testTaskManager.getHistory().getFirst().getId());
-        Assertions.assertEquals(3,testTaskManager.getHistory().getLast().getId());
+        assertEquals(List.of(testTask2, testTask3), historyManager.getHistory());
     }
 
     @Test
     void deleteTaskFromCenter() {
-        Task testTask2 = new Task("Test task2", "Test Task Description2");
-        Task testTask3 = new Task("Test task3", "Test Task Description3");
-        testTaskManager.createTask(testTask);
-        testTaskManager.createTask(testTask2);
-        testTaskManager.createTask(testTask3);
 
-        testTaskManager.getTaskByID(1);
-        testTaskManager.getTaskByID(2);
-        testTaskManager.getTaskByID(3);
+        historyManager.add(testTask);
+        historyManager.add(testTask2);
+        historyManager.add(testTask3);
 
-        testTaskManager.deleteTaskByID(2);
+        historyManager.remove(1);
 
-        Assertions.assertEquals(2,testTaskManager.getHistory().size());
-        Assertions.assertEquals(1,testTaskManager.getHistory().getFirst().getId());
-        Assertions.assertEquals(3,testTaskManager.getHistory().getLast().getId());
-
+        assertEquals(List.of(testTask, testTask3), historyManager.getHistory());
     }
 }

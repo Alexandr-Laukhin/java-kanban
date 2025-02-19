@@ -63,8 +63,6 @@ public class Main {
 
         taskManager.deleteTaskByID(7);
         taskManager.deleteEpicByID(5);
-
-
     }
 }
 
