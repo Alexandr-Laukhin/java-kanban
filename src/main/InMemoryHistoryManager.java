@@ -11,8 +11,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node tail;
 
     private static class Node {
-        private Node prev = null;
-        private Node next = null;
+        private Node prev;
+        private Node next;
         private Task thisTask;
 
         public Node(Task thisTask) {
@@ -32,8 +32,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         historyMap.put(tail.thisTask.getId(), tail);
     }
 
-    private void removeNode(Node node, int id) {
-        node = historyMap.remove(id);                                  //мы можем сразу удалить ноду из хешмапы и проверить на null
+    private void removeNode(int id) {
+        Node node = historyMap.remove(id);                                  //мы можем сразу удалить ноду из хешмапы и проверить на null
         if (node == null) {                                            //если null значит ноды нет и нечего удалять - выходим из метода
             return;
         }
@@ -65,14 +65,14 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (task != null) {
-            removeNode(historyMap.get(task.getId()), task.getId());
+            removeNode(task.getId());
         }
         linkLast(task);
     }
 
     @Override
     public void remove(int id) {
-        removeNode(historyMap.get(id), id);
+        removeNode(id);
     }
 }
 
