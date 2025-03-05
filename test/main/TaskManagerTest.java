@@ -1,12 +1,10 @@
 package main;
 
 import classes.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TaskManagerTest {
 
@@ -46,52 +44,65 @@ class TaskManagerTest {
     void deleteTasks() {
         Task testTask2 = new Task("Test task2", "Test Task Description2");
         testTaskManager.createTask(testTask2);
+        testTaskManager.getTaskByID(1);
+        testTaskManager.getTaskByID(4);
+        testTaskManager.getSubTaskByID(3);
+
         testTaskManager.deleteTasks();
 
-        Assertions.assertNull(testTaskManager.getTaskByID(1));
+        assertEquals(1, testTaskManager.getHistory().size());
+        assertEquals(0, testTaskManager.getTasks().size());
+
     }
 
     @Test
     void deleteEpics() {
-        Epic testEpic2 = new Epic("Test epic2", "Test Epic Description2");
-        testTaskManager.createEpic(testEpic2);
-        SubTask testSubTask2 = new SubTask("Test subTask2", "Test SubTask Description2", 4);
-        testTaskManager.createSubTask(testSubTask2);
+        testTaskManager.getEpicByID(2);
+        testTaskManager.getSubTaskByID(3);
+        testTaskManager.getTaskByID(1);
 
         testTaskManager.deleteEpics();
 
-        Assertions.assertNull(testTaskManager.getEpicByID(2));
-        Assertions.assertNull(testTaskManager.getSubTaskByID(3));
-        Assertions.assertNull(testTaskManager.getEpicByID(4));
-        Assertions.assertNull(testTaskManager.getSubTaskByID(5));
+        assertEquals(1, testTaskManager.getHistory().size());
+        assertEquals(0, testTaskManager.getEpics().size());
+        assertEquals(0, testTaskManager.getSubTasks().size());
     }
 
     @Test
     void deleteSubTasks() {
-        SubTask testSubTask2 = new SubTask("Test subTask2", "Test SubTask Description2", 2);
-        testTaskManager.createSubTask(testSubTask2);
+        testTaskManager.getEpicByID(2);
+        testTaskManager.getSubTaskByID(3);
+
         testTaskManager.deleteSubTasks();
 
-        Assertions.assertNull(testTaskManager.getSubTaskByID(3));
+        assertEquals(1, testTaskManager.getHistory().size());
+        assertEquals(0, testTaskManager.getSubTasks().size());
     }
 
     @Test
     void deleteTaskByID() {
+        testTaskManager.getTaskByID(1);
+        testTaskManager.getEpicByID(2);
         testTaskManager.deleteTaskByID(1);
 
-        Assertions.assertNull(testTaskManager.getTaskByID(1));
+        assertEquals(1, testTaskManager.getHistory().size());
     }
 
     @Test
     void deleteEpicByID() {
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
         testTaskManager.createEpic(testEpic);
-        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
+        SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 4);
         testTaskManager.createSubTask(testSubTask);
+
+        testTaskManager.getEpicByID(2);
+        testTaskManager.getEpicByID(4);
+        testTaskManager.getSubTaskByID(3);
+        testTaskManager.getSubTaskByID(5);
+
         testTaskManager.deleteEpicByID(2);
 
-        Assertions.assertNull(testTaskManager.getEpicByID(2));
-        Assertions.assertNull(testTaskManager.getSubTaskByID(3));
+        assertEquals(2, testTaskManager.getHistory().size());
     }
 
     @Test
@@ -100,9 +111,12 @@ class TaskManagerTest {
         testTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
         testTaskManager.createSubTask(testSubTask);
+
+        testTaskManager.getSubTaskByID(3);
+        testTaskManager.getSubTaskByID(5);
         testTaskManager.deleteSubTaskByID(3);
 
-        Assertions.assertNull(testTaskManager.getSubTaskByID(3));
+        assertEquals(1, testTaskManager.getHistory().size());
     }
 
     @Test
@@ -131,7 +145,8 @@ class TaskManagerTest {
 
     @Test
     void taskManagerLoadHistoryTest() {
-        assertNotNull(testTaskManager.getHistory());
+        testTaskManager.getTaskByID(1);
+        assertEquals(1, testTaskManager.getHistory().size());
     }
 
     @Test
@@ -141,5 +156,4 @@ class TaskManagerTest {
         assertEquals("Test subTask", testTaskManager.getSubTasksFromEpicByID(2).getFirst().getName());
         // так мне показалось более точно и правильно, решил сделать 2 варианта
     }
-
 }
