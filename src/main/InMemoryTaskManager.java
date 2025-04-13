@@ -1,12 +1,9 @@
 package main;
 
 import classes.*;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -76,17 +73,29 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTasks() {
+        for (Integer integer : tasks.keySet()) {
+            historyManager.remove(integer);
+        }
         tasks.clear();
     }
 
     @Override
     public void deleteEpics() {
+        for (Integer integer : epics.keySet()) {
+            historyManager.remove(integer);
+        }
+        for (Integer integer : subTasks.keySet()) {
+            historyManager.remove(integer);
+        }
         epics.clear();
         subTasks.clear();
     }
 
     @Override
     public void deleteSubTasks() {
+        for (Integer integer : subTasks.keySet()) {
+            historyManager.remove(integer);
+        }
         subTasks.clear();
         for (Epic epic : epics.values()) {
             epic.getSubTasksID().clear();
@@ -97,6 +106,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTaskByID(int taskID) {
         tasks.remove(taskID);
+        historyManager.remove(taskID);
     }
 
     @Override
@@ -104,9 +114,11 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Integer> epicSubtasksId = new ArrayList<>(epics.get(epicID).getSubTasksID());
 
         for (Integer integer : epicSubtasksId) {
+            historyManager.remove(integer);
             subTasks.remove(integer);
         }
         epics.remove(epicID);
+        historyManager.remove(epicID);
     }
 
     @Override
@@ -117,6 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         subTasks.remove(subTaskID);
         checkEpicStatus(epicId);
+        historyManager.remove(subTaskID);
     }
 
     @Override
@@ -124,8 +137,7 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = tasks.get(taskID);
         historyManager.add(task);
         return task;
-    } // В таком ключе я, как обычно, не подумал. Спасибо, что обратил на это внимание, двойные обращения к хешмапам
-    // действительно менее аккуратно выглядят, и систему, как я понимаю, будут нагружать больше.
+    }
 
     @Override
     public Epic getEpicByID(int epicID) {
@@ -181,6 +193,4 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
     }
-
-
 }
