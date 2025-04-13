@@ -18,6 +18,10 @@ public class Task {
         return name;
     }
 
+    public TaskTypes getType() {
+        return TaskTypes.TASK;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

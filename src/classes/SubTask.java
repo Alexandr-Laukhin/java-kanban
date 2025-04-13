@@ -17,4 +17,8 @@ public class SubTask extends Task {
         this.parentID = parentID;
     }
 
+    @Override
+    public TaskTypes getType() {
+        return TaskTypes.SUBTASK;
+    }
 }

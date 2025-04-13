@@ -3,12 +3,15 @@ package main;
 import classes.Epic;
 import classes.SubTask;
 import classes.Task;
+import classes.ToFromString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+
+import static classes.ToFromString.fromString;
 
 class FileBackedTaskManagerTest {
 
@@ -19,10 +22,9 @@ class FileBackedTaskManagerTest {
 
     @BeforeEach
     void createManagerAndTask() throws IOException {
-        testFileBackedTaskManager = new FileBackedTaskManager();
         testTask = new Task("TestTask", "Test description");
         tempFile = File.createTempFile("testTemp", ".csv");
-        testFileBackedTaskManager.setSaveFileName(tempFile);
+        testFileBackedTaskManager = new FileBackedTaskManager(tempFile);
         testFileBackedTaskManager.createTask(testTask);
     }
 
@@ -32,7 +34,7 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void testLoadFromFile() throws IOException {
+    void testLoadFromFile() {
         FileBackedTaskManager secondManager = FileBackedTaskManager.loadFromFile(tempFile);
 
         Assertions.assertEquals(1, secondManager.getTasks().size());
@@ -40,19 +42,19 @@ class FileBackedTaskManagerTest {
 
     @Test
     void saveTest() throws IOException {
-        testFileBackedTaskManager.save();
         Reader fileReader = new FileReader(tempFile);
         BufferedReader br = new BufferedReader(fileReader);
-        String line = br.readLine();
-        String expectedLine = "1, class classes.Task, TestTask, NEW, Test description";
+        br.readLine();
+        String line2 = br.readLine();
+        String expectedLine = "1, TASK, TestTask, NEW, Test description";
 
-        Assertions.assertEquals(expectedLine, line);
+        Assertions.assertEquals(expectedLine, line2);
     }
 
     @Test
     void testToString() {
-        String line = testFileBackedTaskManager.toString(testTask);
-        String expectedLine = "1, class classes.Task, TestTask, NEW, Test description";
+        String line = ToFromString.toString(testTask);
+        String expectedLine = "1, TASK, TestTask, NEW, Test description";
 
         Assertions.assertEquals(expectedLine, line);
     }
@@ -60,8 +62,8 @@ class FileBackedTaskManagerTest {
     @Test
     void testFromString() {
         tempFile.delete();
-        String line = "1, class classes.Task, TestTask, NEW, Test description";
-        Task task = FileBackedTaskManager.fromString(line);
+        String line = "1, TASK, TestTask, NEW, Test description";
+        Task task = fromString(line);
         int expectedId = 1;
         String expectedName = "TestTask";
 
@@ -71,24 +73,22 @@ class FileBackedTaskManagerTest {
 
     @Test
     void saveEmptyFile() throws IOException {
-        FileBackedTaskManager empty = new FileBackedTaskManager();
-        empty.setSaveFileName(tempFile);
-        empty.save();
-        BufferedReader br = new BufferedReader(new FileReader(tempFile));
+        File emptyFile = File.createTempFile("testEmptyTemp", ".csv");
+        BufferedReader br = new BufferedReader(new FileReader(emptyFile));
 
         Assertions.assertNull(br.readLine());
+        emptyFile.delete();
     }
 
     @Test
     void loadEmptyFile() throws IOException {
-        FileBackedTaskManager empty = new FileBackedTaskManager();
-        empty.setSaveFileName(tempFile);
-        empty.save();
-        FileBackedTaskManager empryLoad = FileBackedTaskManager.loadFromFile(tempFile);
+        File emptyFile = File.createTempFile("testEmptyTemp", ".csv");
+        FileBackedTaskManager empryLoad = FileBackedTaskManager.loadFromFile(emptyFile);
 
         Assertions.assertTrue(empryLoad.getTasks().isEmpty());
         Assertions.assertTrue(empryLoad.getEpics().isEmpty());
         Assertions.assertTrue(empryLoad.getSubTasks().isEmpty());
+        emptyFile.delete();
     }
 
     @Test
@@ -97,16 +97,16 @@ class FileBackedTaskManagerTest {
         testFileBackedTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("TestSubTask", "Test subtask description", 2);
         testFileBackedTaskManager.createTask(testSubTask);
-        testFileBackedTaskManager.save();
         Reader fileReader = new FileReader(tempFile);
         BufferedReader br = new BufferedReader(fileReader);
 
+        br.readLine();
         String line = br.readLine();
         String line2 = br.readLine();
         String line3 = br.readLine();
-        String expectedLine = "1, class classes.Task, TestTask, NEW, Test description";
-        String expectedLine3 = "2, class classes.Epic, TestEpic, NEW, Test epic description";
-        String expectedLine2 = "3, class classes.SubTask, TestSubTask, NEW, Test subtask description, 2";
+        String expectedLine = "1, TASK, TestTask, NEW, Test description";
+        String expectedLine3 = "2, EPIC, TestEpic, NEW, Test epic description";
+        String expectedLine2 = "3, SUBTASK, TestSubTask, NEW, Test subtask description, 2";
 
         Assertions.assertEquals(expectedLine, line);
         Assertions.assertEquals(expectedLine2, line2);
@@ -114,20 +114,13 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void loadSomeTasks() throws IOException {
+    void loadSomeTasks() {
         Epic testEpic = new Epic("TestEpic", "Test epic description");
         testFileBackedTaskManager.createEpic(testEpic);
         SubTask testSubTask = new SubTask("TestSubTask", "Test subtask description", 2);
-        testFileBackedTaskManager.createTask(testSubTask);
-        testFileBackedTaskManager.save();
+        testFileBackedTaskManager.createSubTask(testSubTask);
         FileBackedTaskManager secondManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        Assertions.assertEquals("TestTask", secondManager.getTaskByID(1).getName());
-        Assertions.assertEquals("TestSubTask", secondManager.getTaskByID(2).getName());
-        Assertions.assertEquals("TestEpic", secondManager.getTaskByID(3).getName());
-
-        // Привет! Подскажи, пожалуйста, почему такая странная очередность выдачи результата? Сохраняю сначала таску,
-        // потом эпик, потом сабстаску, и, по логике, id должны быть 1 -таска, 2 -эпик, 3 -сабтаска ,
-        // а записывается он в файл как таска-сабтаска-эпик.
+        Assertions.assertEquals(testFileBackedTaskManager.getTasks(), secondManager.getTasks());
     }
 }

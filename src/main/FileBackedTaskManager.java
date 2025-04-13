@@ -1,245 +1,145 @@
 package main;
 
-import classes.Epic;
-import classes.Status;
-import classes.SubTask;
-import classes.Task;
+import classes.*;
 
 import java.io.*;
 
+import static classes.ToFromString.fromString;
+
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
+    private File saveFileName;
 
-    private File saveFileName = new File("taskSaves.csv");
-
-    public FileBackedTaskManager() {
+    public FileBackedTaskManager(File saveFileName) {
+        this.saveFileName = saveFileName;
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) throws IOException {
+    public static FileBackedTaskManager loadFromFile(File file) {
 
-        FileBackedTaskManager taskManager = new FileBackedTaskManager();
+        FileBackedTaskManager taskManager = new FileBackedTaskManager(file);
         try (Reader fileReader = new FileReader(file);
              BufferedReader br = new BufferedReader(fileReader)) {
+            br.readLine();
             while (br.ready()) {
                 String line = br.readLine();
                 Task task = fromString(line);
-                if (task instanceof Task) {
-                    taskManager.createTask(task);
-                } else if (task instanceof Epic) {
-                    taskManager.createEpic((Epic) task);
-                } else {
-                    taskManager.createSubTask((SubTask) task);
+                if (task.getType() == TaskTypes.TASK) {
+                    taskManager.updateTask(task);
+                } else if (task.getType() == TaskTypes.EPIC) {
+                    taskManager.updateEpic((Epic) task);
+                } else if (task.getType() == TaskTypes.SUBTASK) {
+                    taskManager.updateSubTask((SubTask) task);
                 }
             }
 
         } catch (IOException e) {
-            System.out.println("Ошибка при чтении файла: " + e.getMessage());
-            e.printStackTrace();
+            try {
+                throw new ManagerLoadException("Ошибка загрузки задач из файла");
+            } catch (ManagerLoadException ex) {
+                throw new RuntimeException(ex);
+            }
         }
-
         return taskManager;
     }
 
-
-    public void save() throws IOException {
+    private void save() {
 
         try (Writer fileWriter = new FileWriter(saveFileName)) {
 
+            fileWriter.write("id,type,name,status,description,epic\n");
+
             for (Task taskObject : getTasks()) {
-                String convertedTask = toString(taskObject);
+                String convertedTask = ToFromString.toString(taskObject);
                 fileWriter.write(convertedTask + "\n");
             }
 
             for (Epic epicObject : getEpics()) {
-                String convertedEpic = toString(epicObject);
+                String convertedEpic = ToFromString.toString(epicObject);
                 fileWriter.write(convertedEpic + "\n");
             }
 
             for (SubTask subTaskObject : getSubTasks()) {
-                String convertedSubTask = toString(subTaskObject);
+                String convertedSubTask = ToFromString.toString(subTaskObject);
                 fileWriter.write(convertedSubTask + "\n");
             }
-        }
-    }
-
-    public String toString(Task task) {
-        String convertedTask;
-        if (task instanceof SubTask) {
-            SubTask subTask = (SubTask) task;
-            convertedTask = subTask.getId() + ", " + subTask.getClass() + ", " + subTask.getName() + ", " + subTask.getStatus() + ", " + subTask.getDescription() + ", " + subTask.getParentID();
-        } else {
-            convertedTask = task.getId() + ", " + task.getClass() + ", " + task.getName() + ", " + task.getStatus() + ", " + task.getDescription();
-        }
-        return convertedTask;
-    }
-
-    public static Task fromString(String value) {
-        String[] convertedString = value.split(", ");
-        Task task;
-
-        if (convertedString[1].equals("class classes.Task")) {
-            task = new Task(convertedString[2], convertedString[4]);
-            task.setId(Integer.parseInt(convertedString[0]));
-            if (convertedString[3].equals("NEW")) {
-                task.setStatus(Status.NEW);
-            } else if (convertedString[3].equals("IN_PROGRESS")) {
-                task.setStatus(Status.IN_PROGRESS);
-            } else {
-                task.setStatus(Status.DONE);
+        } catch (IOException e) {
+            try {
+                throw new ManagerSaveException("Ошибка сохранения");
+            } catch (ManagerSaveException ex) {
+                throw new RuntimeException(ex);
             }
-
-        } else if (convertedString[1].equals("class classes.Epic")) {
-            Epic epic = new Epic(convertedString[2], convertedString[4]);
-            epic.setId(Integer.parseInt(convertedString[0]));
-            if (convertedString[3].equals("NEW")) {
-                epic.setStatus(Status.NEW);
-            } else if (convertedString[3].equals("IN_PROGRESS")) {
-                epic.setStatus(Status.IN_PROGRESS);
-            } else {
-                epic.setStatus(Status.DONE);
-            }
-            task = epic;
-
-        } else {
-            SubTask subTask = new SubTask(convertedString[2], convertedString[4], Integer.parseInt(convertedString[5]));
-            subTask.setId(Integer.parseInt(convertedString[0]));
-            if (convertedString[3].equals("NEW")) {
-                subTask.setStatus(Status.NEW);
-            } else if (convertedString[3].equals("IN_PROGRESS")) {
-                subTask.setStatus(Status.IN_PROGRESS);
-            } else {
-                subTask.setStatus(Status.DONE);
-            }
-            task = subTask;
         }
-        return task;
-    }
-
-    public File getSaveFileName() {
-        return saveFileName;
-    }
-
-    public void setSaveFileName(File saveFileName) {
-        this.saveFileName = saveFileName;
     }
 
     @Override
     public void createTask(Task task) {
-        try {
-            super.createTask(task);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при создании задачи: " + e.getMessage());
-        }
+        super.createTask(task);
+        save();
     }
 
     @Override
     public void createEpic(Epic epic) {
-        try {
-            super.createEpic(epic);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при создании эпика: " + e.getMessage());
-        }
+        super.createEpic(epic);
+        save();
     }
 
     @Override
     public void createSubTask(SubTask subTask) {
-        try {
-            super.createSubTask(subTask);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при создании подзадачи: " + e.getMessage());
-        }
+        super.createSubTask(subTask);
+        save();
     }
 
     @Override
     public void deleteTasks() {
-        try {
-            super.deleteTasks();
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при удалении задач: " + e.getMessage());
-        }
+        super.deleteTasks();
+        save();
     }
 
     @Override
     public void deleteEpics() {
-        try {
-            super.deleteEpics();
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при удалении эпиков: " + e.getMessage());
-        }
+        super.deleteEpics();
+        save();
     }
 
     @Override
     public void deleteSubTasks() {
-        try {
-            super.deleteSubTasks();
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при удалении подзадач: " + e.getMessage());
-        }
+        super.deleteSubTasks();
+        save();
     }
 
     @Override
     public void deleteTaskByID(int taskID) {
-        try {
-            super.deleteTaskByID(taskID);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при удалении задачи: " + e.getMessage());
-        }
+        super.deleteTaskByID(taskID);
+        save();
     }
 
     @Override
     public void deleteEpicByID(int epicID) {
-        try {
-            super.deleteEpicByID(epicID);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при удалении эпика: " + e.getMessage());
-        }
+        super.deleteEpicByID(epicID);
+        save();
     }
 
     @Override
     public void deleteSubTaskByID(int subTaskID) {
-        try {
-            super.deleteSubTaskByID(subTaskID);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при удалении подзадачи: " + e.getMessage());
-        }
+        super.deleteSubTaskByID(subTaskID);
+        save();
     }
 
     @Override
     public void updateTask(Task task) {
-        try {
-            super.updateTask(task);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при обновлении задачи: " + e.getMessage());
-        }
+        super.updateTask(task);
+        save();
     }
 
     @Override
     public void updateEpic(Epic epic) {
-        try {
-            super.updateEpic(epic);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при обновлении эпика: " + e.getMessage());
-        }
+        super.updateEpic(epic);
+        save();
     }
 
     @Override
     public void updateSubTask(SubTask subTask) {
-        try {
-            super.updateSubTask(subTask);
-            save();
-        } catch (IOException e) {
-            System.out.println("Ошибка при обновлении подзадачи: " + e.getMessage());
-        }
+        super.updateSubTask(subTask);
+        save();
     }
 }

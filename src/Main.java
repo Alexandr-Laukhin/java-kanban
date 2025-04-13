@@ -1,7 +1,6 @@
 import classes.*;
 import classes.Status;
 import main.FileBackedTaskManager;
-import main.InMemoryTaskManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,8 +14,8 @@ public class Main {
 
         String saveTasks = "taskSaves.csv";
         File file = new File(saveTasks);
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        FileBackedTaskManager backedTaskManager = new FileBackedTaskManager();
+        // InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        FileBackedTaskManager backedTaskManager = new FileBackedTaskManager(file);
 
 
         Epic epic1 = new Epic("Test epic", "Test description");
@@ -39,15 +38,6 @@ public class Main {
 
         SubTask subTask12 = new SubTask("test subtask 12", "test subtask description 12", 6);
         backedTaskManager.createSubTask(subTask12);
-        // taskManager.deleteEpicByID(1);
-
-
-//        taskManager.deleteSubTaskByID(2);
-//        taskManager.deleteSubTaskByID(3);
-//        taskManager.deleteSubTaskByID(4);
-
-
-        Task task = new Task("Test task 85", "Test description 85");
 
         subTask1.setStatus(Status.IN_PROGRESS);
         subTask2.setStatus(Status.DONE);
@@ -59,10 +49,7 @@ public class Main {
 
         subTask3.setStatus(Status.NEW);
         backedTaskManager.updateSubTask(subTask3);
-//        taskManager.deleteSubTaskByID(2);
-//        taskManager.deleteSubTaskByID(3);
 
-        //taskManager.deleteSubTasks();
         Task taskTest = new Task("Test task", "Test Task Description");
         backedTaskManager.createTask(taskTest);
         backedTaskManager.getTaskByID(8);
