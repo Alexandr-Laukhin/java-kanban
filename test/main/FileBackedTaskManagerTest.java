@@ -3,7 +3,7 @@ package main;
 import classes.Epic;
 import classes.SubTask;
 import classes.Task;
-import classes.ToFromString;
+import classes.TaskConverter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
-import static classes.ToFromString.fromString;
+import static classes.TaskConverter.fromString;
 
 class FileBackedTaskManagerTest {
 
@@ -53,7 +53,7 @@ class FileBackedTaskManagerTest {
 
     @Test
     void testToString() {
-        String line = ToFromString.toString(testTask);
+        String line = TaskConverter.toString(testTask);
         String expectedLine = "1, TASK, TestTask, NEW, Test description";
 
         Assertions.assertEquals(expectedLine, line);
@@ -122,5 +122,7 @@ class FileBackedTaskManagerTest {
         FileBackedTaskManager secondManager = FileBackedTaskManager.loadFromFile(tempFile);
 
         Assertions.assertEquals(testFileBackedTaskManager.getTasks(), secondManager.getTasks());
+        Assertions.assertEquals(testFileBackedTaskManager.getEpics(), secondManager.getEpics());
+        Assertions.assertEquals(testFileBackedTaskManager.getSubTasks(), secondManager.getSubTasks());
     }
 }

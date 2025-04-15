@@ -4,7 +4,7 @@ import classes.*;
 
 import java.io.*;
 
-import static classes.ToFromString.fromString;
+import static classes.TaskConverter.fromString;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -23,21 +23,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             while (br.ready()) {
                 String line = br.readLine();
                 Task task = fromString(line);
-                if (task.getType() == TaskTypes.TASK) {
-                    taskManager.updateTask(task);
-                } else if (task.getType() == TaskTypes.EPIC) {
-                    taskManager.updateEpic((Epic) task);
-                } else if (task.getType() == TaskTypes.SUBTASK) {
-                    taskManager.updateSubTask((SubTask) task);
+
+                switch (task.getType()) {
+                    case TASK -> taskManager.tasks.put(task.getId(), task);
+                    case EPIC -> taskManager.epics.put(task.getId(), (Epic) task);
+                    case SUBTASK -> taskManager.subTasks.put(task.getId(), (SubTask) task);
                 }
             }
 
         } catch (IOException e) {
-            try {
-                throw new ManagerLoadException("Ошибка загрузки задач из файла");
-            } catch (ManagerLoadException ex) {
-                throw new RuntimeException(ex);
-            }
+            throw new ManagerLoadException("Ошибка загрузки задач из файла");
         }
         return taskManager;
     }
@@ -49,25 +44,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             fileWriter.write("id,type,name,status,description,epic\n");
 
             for (Task taskObject : getTasks()) {
-                String convertedTask = ToFromString.toString(taskObject);
+                String convertedTask = TaskConverter.toString(taskObject);
                 fileWriter.write(convertedTask + "\n");
             }
 
             for (Epic epicObject : getEpics()) {
-                String convertedEpic = ToFromString.toString(epicObject);
+                String convertedEpic = TaskConverter.toString(epicObject);
                 fileWriter.write(convertedEpic + "\n");
             }
 
             for (SubTask subTaskObject : getSubTasks()) {
-                String convertedSubTask = ToFromString.toString(subTaskObject);
+                String convertedSubTask = TaskConverter.toString(subTaskObject);
                 fileWriter.write(convertedSubTask + "\n");
             }
+
         } catch (IOException e) {
-            try {
-                throw new ManagerSaveException("Ошибка сохранения");
-            } catch (ManagerSaveException ex) {
-                throw new RuntimeException(ex);
-            }
+            throw new ManagerSaveException("Ошибка сохранения");
         }
     }
 
