@@ -9,6 +9,11 @@ public class SubTask extends Task {
         this.parentID = parentID;
     }
 
+    public SubTask(String name, String description, Status status, int id, int parentID) {
+        super(name, description, status, id);
+        this.parentID = parentID;
+    }
+
     public int getParentID() {
         return parentID;
     }

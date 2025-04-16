@@ -15,7 +15,6 @@ public class TaskConverter {
 
     public static Task fromString(String value) {
         String[] convertedString = value.split(", ");
-        Task task;
         int id = Integer.parseInt(convertedString[0]);
         TaskTypes type = TaskTypes.valueOf(convertedString[1]);
         String taskName = convertedString[2];
@@ -23,36 +22,13 @@ public class TaskConverter {
         String taskDescription = convertedString[4];
         int parentId;
 
-
-        if (type == TaskTypes.TASK) {
-            task = new Task(taskName, taskDescription);
-            task.setId(id);
-            task.setStatus(status);
-
-            return task;
-
-        } else if (type == TaskTypes.EPIC) {
-            Epic epic = new Epic(taskName, taskDescription);
-            epic.setId(id);
-            epic.setStatus(status);
-
-            return epic;
-
-        } else {
-            parentId = Integer.parseInt(convertedString[5]);
-            SubTask subTask = new SubTask(taskName, taskDescription, parentId);
-            subTask.setId(id);
-            subTask.setStatus(status);
-
-            return subTask;
-
-            // Ты писал, что здесь все можно выразить одной строчкой, я не смог найти другого метода, кроме как
-            // записать все то же самое, что у меня уже записано, только в одну строчку. Можешь более подробно
-            // пояснить, что имелось ввиду? У меня вышло вот такая запись:
-            // SubTask subTask = new SubTask(taskName, taskDescription, Integer.parseInt(convertedString[5]));
-            //subTask.setId(id); subTask.setStatus(status); return subTask;
-
-            // Но она, как мне показалось, менее читабельна, чем разбитая по строчкам. Хотя, если нужно, записать так не проблема.
-        }
+        return switch (type) {
+            case TASK -> new Task(taskName, taskDescription, status, id);
+            case EPIC -> new Epic(taskName, taskDescription, status, id);
+            case SUBTASK -> {
+                parentId = Integer.parseInt(convertedString[5]);
+                yield new SubTask(taskName, taskDescription, status, id, parentId);
+            }
+        }; // так мне показалось лакончинее и красивее, если нужно, верну на if/else
     }
 }
