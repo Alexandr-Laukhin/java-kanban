@@ -29,6 +29,6 @@ public class TaskConverter {
                 parentId = Integer.parseInt(convertedString[5]);
                 yield new SubTask(taskName, taskDescription, status, id, parentId);
             }
-        }; // так мне показалось лакончинее и красивее, если нужно, верну на if/else
+        };
     }
 }
