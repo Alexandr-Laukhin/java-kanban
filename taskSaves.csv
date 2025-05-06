@@ -1,3 +1,6 @@
-1, class classes.Task, TestTask, NEW, Test description
-2, class classes.Epic, TestEpic, NEW, Test epic description
-3, class classes.SubTask, TestSubTask, NEW, Test subtask description, 2
+id,type,name,status,description,epic
+1, EPIC, Test epic, NEW, Test description, 40
+5, EPIC, Test 2, NEW, Test description 2, 10
+2, SUBTASK, test subtask 1, IN_PROGRESS, test subtask description 1, 10, 1
+3, SUBTASK, test subtask 2, DONE, test subtask description 2, 10, 1
+4, SUBTASK, test subtask 3, NEW, test subtask description 3, 10, 1

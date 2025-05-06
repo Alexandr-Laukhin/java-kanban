@@ -2,9 +2,10 @@ package main;
 
 import classes.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -13,9 +14,14 @@ public class InMemoryTaskManager implements TaskManager {
     protected HashMap<Integer, SubTask> subTasks = new HashMap<>();
     protected int counter = 0;
     private HistoryManager historyManager = Managers.getDefaultHistory();
+    protected TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     @Override
     public void createTask(Task task) {
+        if (intersectionCheck(task)) {
+            System.out.println("Есть пересечения по времени задачи. Я не знаю, что дальше делать с найденными пересечениями, поэтому просто вывел это сообщение");
+            // return;
+        }
         counter++;
         task.setId(counter);
         tasks.put(counter, task);
@@ -23,6 +29,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createEpic(Epic epic) {
+        if (intersectionCheck(epic)) {
+            System.out.println("Есть пересечения по времени эпика");
+            // return;
+        }
         counter++;
         epic.setId(counter);
         epics.put(counter, epic);
@@ -30,6 +40,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createSubTask(SubTask subTask) {
+        if (intersectionCheck(subTask)) {
+            System.out.println("Есть пересечения по времени подзадачи");
+            // return;
+        }
         counter++;
         subTask.setId(counter);
         subTasks.put(counter, subTask);
@@ -37,6 +51,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (epics.containsKey(subTask.getParentID()) && epic != null) {
             epic.addSubTaskToList(counter);
+            epic.setDuration(epic.getDuration().plus(subTask.getDuration()));
             checkEpicStatus(subTask.getParentID());
         }
     }
@@ -58,13 +73,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<SubTask> getSubTasksFromEpicByID(int epicID) {
-
-        ArrayList<SubTask> subTasksInEpic = new ArrayList<>();
-
-        for (Integer subtaskId : epics.get(epicID).getSubTasksID()) {
-            subTasksInEpic.add(subTasks.get(subtaskId));
-        }
-        return subTasksInEpic;
+        return epics.get(epicID).getSubTasksID().stream()
+                .map(subTasks::get)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -74,34 +85,27 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTasks() {
-        for (Integer integer : tasks.keySet()) {
-            historyManager.remove(integer);
-        }
+        tasks.keySet().forEach(historyManager::remove);
         tasks.clear();
     }
 
     @Override
     public void deleteEpics() {
-        for (Integer integer : epics.keySet()) {
-            historyManager.remove(integer);
-        }
-        for (Integer integer : subTasks.keySet()) {
-            historyManager.remove(integer);
-        }
+        epics.keySet().forEach(historyManager::remove);
+        subTasks.keySet().forEach(historyManager::remove);
         epics.clear();
         subTasks.clear();
     }
 
     @Override
     public void deleteSubTasks() {
-        for (Integer integer : subTasks.keySet()) {
-            historyManager.remove(integer);
-        }
+        subTasks.keySet().forEach(historyManager::remove);
         subTasks.clear();
-        for (Epic epic : epics.values()) {
+        epics.values().forEach(epic -> {
             epic.getSubTasksID().clear();
             checkEpicStatus(epic.getId());
-        }
+        });
+
     }
 
     @Override
@@ -112,12 +116,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteEpicByID(int epicID) {
-        ArrayList<Integer> epicSubtasksId = new ArrayList<>(epics.get(epicID).getSubTasksID());
+        new ArrayList<>(epics.get(epicID).getSubTasksID())
+                .forEach(subTaskId -> {
+                    historyManager.remove(subTaskId);
+                    subTasks.remove(subTaskId);
+                });
 
-        for (Integer integer : epicSubtasksId) {
-            historyManager.remove(integer);
-            subTasks.remove(integer);
-        }
         epics.remove(epicID);
         historyManager.remove(epicID);
     }
@@ -156,17 +160,29 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
+        if (intersectionCheck(task)) {
+            System.out.println("Есть пересечения по времени задачи");
+            //return;
+        }
         tasks.put(task.getId(), task);
     }
 
     @Override
     public void updateEpic(Epic epic) {
+        if (intersectionCheck(epic)) {
+            System.out.println("Есть пересечения по времени эпика");
+            //return;
+        }
         epics.put(epic.getId(), epic);
         checkEpicStatus(epic.getId());
     }
 
     @Override
     public void updateSubTask(SubTask subTask) {
+        if (intersectionCheck(subTask)) {
+            System.out.println("Есть пересечения по времени подзадачи");
+            //return;
+        }
         subTasks.put(subTask.getId(), subTask);
         checkEpicStatus(subTask.getParentID());
     }
@@ -177,21 +193,49 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (checkEpic.getSubTasksID().isEmpty()) {
             epics.get(epicID).setStatus(Status.NEW);
-        } else {
-            ArrayList<Integer> subTasksIdList = new ArrayList<>(checkEpic.getSubTasksID());
-            ArrayList<Status> subTasksStatusList = new ArrayList<>();
-
-            for (Integer integer : subTasksIdList) {
-                subTasksStatusList.add(subTasks.get(integer).getStatus());
-            }
-
-            if (!subTasksStatusList.contains(Status.IN_PROGRESS) && !subTasksStatusList.contains(Status.DONE)) {
-                checkEpic.setStatus(Status.NEW);
-            } else if (!subTasksStatusList.contains(Status.IN_PROGRESS) && !subTasksStatusList.contains(Status.NEW)) {
-                checkEpic.setStatus(Status.DONE);
-            } else {
-                checkEpic.setStatus(Status.IN_PROGRESS);
-            }
+            return;
         }
+
+        List<Status> subTasksStatusList = checkEpic.getSubTasksID().stream()
+                .map(subTasks::get)
+                .map(Task::getStatus)
+                .toList();
+
+        boolean isNew = subTasksStatusList.contains(Status.NEW);
+        boolean isInProgress = subTasksStatusList.contains(Status.IN_PROGRESS);
+        boolean isDone = subTasksStatusList.contains(Status.DONE);
+
+        checkEpic.setStatus(
+                !isInProgress && !isDone ? Status.NEW :
+                        !isInProgress && !isNew ? Status.DONE :
+                                Status.IN_PROGRESS
+        );
     }
+
+    public TreeSet<Task> getPrioritizedTasks() {
+        prioritizedTasks.clear();
+        Stream.of(tasks.values(), epics.values(), subTasks.values())
+                .forEach(prioritizedTasks::addAll);
+        return prioritizedTasks;
+    }
+
+    public boolean segmentIntersection(Task task1, Task task2) {
+        boolean ifT1isBeforeT2 = task1.getStartTime().isBefore(task2.getStartTime()) && task1.getEndTime().isAfter(task2.getStartTime());
+        boolean ifT1isAfterT2 = task2.getStartTime().isBefore(task1.getStartTime()) && task2.getEndTime().isAfter(task1.getStartTime());
+        boolean ifT1equalsT2 = task1.equals(task2);
+
+        return ifT1isBeforeT2 || ifT1isAfterT2 || ifT1equalsT2;
+    } // Если возвращает true, значит есть пересечения.
+
+    public boolean intersectionCheck(Task task1) {
+
+        ArrayList<Task> prioritizedTasksArray = new ArrayList<>(getPrioritizedTasks());
+
+//        if (prioritizedTasksArray.size() < 2) {
+//            return false;
+//        }
+
+        return IntStream.range(0, prioritizedTasksArray.size())
+                .anyMatch(i -> segmentIntersection(prioritizedTasksArray.get(i), task1));
+    } // Если возвращает true, значит есть пересечения.
 }

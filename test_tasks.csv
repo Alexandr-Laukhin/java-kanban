@@ -1,0 +1,4 @@
+id,type,name,status,description,epic
+1, TASK, Test task, NEW, Test Task Description, 10
+2, EPIC, Test epic, NEW, Test Epic Description, 20
+3, SUBTASK, Test subTask, NEW, Test SubTask Description, 10, 2
