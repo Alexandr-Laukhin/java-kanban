@@ -22,7 +22,6 @@ class InMemoryTaskManagerTest extends TaskManagerTest <InMemoryTaskManager> {
         return new InMemoryTaskManager();
     }
 
-
     @BeforeEach
     void creation() {
         testTaskManager = new InMemoryTaskManager();
