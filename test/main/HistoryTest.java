@@ -5,6 +5,7 @@ import classes.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,10 +20,10 @@ class HistoryTest {
     @BeforeEach
     void createTestManagers() {
         historyManager = Managers.getDefaultHistory();
-        testTask = new Task("Test task", "Test Task Description");
-        testTask2 = new Task("Test task2", "Test Task Description2");
+        testTask = new Task("Test task", "Test Task Description", Duration.ofMinutes(10));
+        testTask2 = new Task("Test task2", "Test Task Description2", Duration.ofMinutes(10));
         testTask2.setId(1);
-        testTask3 = new Task("Test task3", "Test Task Description3");
+        testTask3 = new Task("Test task3", "Test Task Description3", Duration.ofMinutes(10));
         testTask3.setId(2);
         historyManager.add(testTask);
     }

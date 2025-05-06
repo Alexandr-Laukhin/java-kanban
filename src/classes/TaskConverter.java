@@ -1,16 +1,26 @@
 package classes;
 
+import java.time.Duration;
+
 public class TaskConverter {
 
     public static String toString(Task task) {
-        String convertedTask;
-        if (task.getType() == TaskTypes.SUBTASK) {
-            SubTask subTask = (SubTask) task;
-            convertedTask = subTask.getId() + ", " + subTask.getType() + ", " + subTask.getName() + ", " + subTask.getStatus() + ", " + subTask.getDescription() + ", " + subTask.getParentID();
-        } else {
-            convertedTask = task.getId() + ", " + task.getType() + ", " + task.getName() + ", " + task.getStatus() + ", " + task.getDescription();
-        }
-        return convertedTask;
+        return task.getType() == TaskTypes.SUBTASK
+                ? String.format("%d, %s, %s, %s, %s, %d, %d",
+                task.getId(),
+                task.getType(),
+                task.getName(),
+                task.getStatus(),
+                task.getDescription(),
+                task.getDuration().toMinutes(),
+                ((SubTask) task).getParentID())
+                : String.format("%d, %s, %s, %s, %s, %d",
+                task.getId(),
+                task.getType(),
+                task.getName(),
+                task.getStatus(),
+                task.getDescription(),
+                task.getDuration().toMinutes());
     }
 
     public static Task fromString(String value) {
@@ -20,14 +30,15 @@ public class TaskConverter {
         String taskName = convertedString[2];
         Status status = Status.valueOf(convertedString[3]);
         String taskDescription = convertedString[4];
+        Duration duration = Duration.ofMinutes(Integer.parseInt(convertedString[5]));
         int parentId;
 
         return switch (type) {
-            case TASK -> new Task(taskName, taskDescription, status, id);
-            case EPIC -> new Epic(taskName, taskDescription, status, id);
+            case TASK -> new Task(taskName, taskDescription, status, id, duration);
+            case EPIC -> new Epic(taskName, taskDescription, status, id, duration);
             case SUBTASK -> {
-                parentId = Integer.parseInt(convertedString[5]);
-                yield new SubTask(taskName, taskDescription, status, id, parentId);
+                parentId = Integer.parseInt(convertedString[6]);
+                yield new SubTask(taskName, taskDescription, status, id, duration, parentId);
             }
         };
     }

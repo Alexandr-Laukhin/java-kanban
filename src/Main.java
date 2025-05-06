@@ -4,6 +4,7 @@ import main.FileBackedTaskManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 import static main.FileBackedTaskManager.loadFromFile;
@@ -18,11 +19,11 @@ public class Main {
         FileBackedTaskManager backedTaskManager = new FileBackedTaskManager(file);
 
 
-        Epic epic1 = new Epic("Test epic", "Test description");
-        Epic epic12 = new Epic("Test 12", "Test description 12");
-        SubTask subTask1 = new SubTask("test subtask 1", "test subtask description 1", 1);
-        SubTask subTask2 = new SubTask("test subtask 2", "test subtask description 2", 1);
-        SubTask subTask3 = new SubTask("test subtask 3", "test subtask description 3", 1);
+        Epic epic1 = new Epic("Test epic", "Test description", Duration.ofMinutes(10));
+        Epic epic12 = new Epic("Test 12", "Test description 12", Duration.ofMinutes(10));
+        SubTask subTask1 = new SubTask("test subtask 1", "test subtask description 1", Duration.ofMinutes(10), 1);
+        SubTask subTask2 = new SubTask("test subtask 2", "test subtask description 2", Duration.ofMinutes(10), 1);
+        SubTask subTask3 = new SubTask("test subtask 3", "test subtask description 3", Duration.ofMinutes(10), 1);
 
         backedTaskManager.createEpic(epic1);
 
@@ -32,11 +33,11 @@ public class Main {
 
         // taskManager.deleteSubTasks();
 
-        Epic epic2 = new Epic("Test 2", "Test description 2");
+        Epic epic2 = new Epic("Test 2", "Test description 2", Duration.ofMinutes(10));
         backedTaskManager.createEpic(epic2);
         backedTaskManager.createEpic(epic12);
 
-        SubTask subTask12 = new SubTask("test subtask 12", "test subtask description 12", 6);
+        SubTask subTask12 = new SubTask("test subtask 12", "test subtask description 12", Duration.ofMinutes(10), 6);
         backedTaskManager.createSubTask(subTask12);
 
         subTask1.setStatus(Status.IN_PROGRESS);
@@ -50,7 +51,7 @@ public class Main {
         subTask3.setStatus(Status.NEW);
         backedTaskManager.updateSubTask(subTask3);
 
-        Task taskTest = new Task("Test task", "Test Task Description");
+        Task taskTest = new Task("Test task", "Test Task Description", Duration.ofMinutes(10));
         backedTaskManager.createTask(taskTest);
         backedTaskManager.getTaskByID(8);
 
