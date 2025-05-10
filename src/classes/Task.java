@@ -1,35 +1,44 @@
 package classes;
 
+import main.TaskManager;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
 
-    private String name;
-    private String description;
-    private Status status = Status.NEW;
-    private int id;
-    private Duration duration;
-    private LocalDateTime startTime = LocalDateTime.now();
+    protected String name;
+    protected String description;
+    protected Status status = Status.NEW;
+    protected int id;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
-    public Task(String name, String description, Duration inMinutes) {
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
-        this.duration = inMinutes;
     }
 
-    public Task(String name, String description, Status status, int id, Duration inMinutes) {
+    public Task(String name, String description, Status status, int id) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.id = id;
-        this.duration = inMinutes;
     }
 
-    public LocalDateTime getEndTime() {
-        return startTime.plusMinutes(duration.toMinutes());
-    }
+    public LocalDateTime getEndTime(TaskManager taskManager) {
+        if (startTime == null) {
+            throw new IllegalStateException("Время старта задачи не задано");
+        }
+        if (duration == null) {
+            throw new IllegalStateException("Длительность задачи не задана");
+        }
+        return startTime.plus(duration);
+    } // Здесь параметр менеджера не нужен, но он нужен в логике того же метода в эпике. А так как логика сквозная,
+    // и методы написаны одни и те же для тасок, эпиков и сабтасок, я решил добавить этот параметр. Как следствие, он
+    // появляется везде, где идет запрос или проверка на время.
 
     public String getName() {
         return name;
@@ -68,7 +77,14 @@ public class Task {
     }
 
     public Duration getDuration() {
+        if (duration == null) {
+            throw new IllegalStateException("Длительность задачи не задана.");
+        }
         return duration;
+    }
+
+    public Optional<Duration> getDurationCheck() {
+        return Optional.ofNullable(duration);
     }
 
     public void setDuration(Duration duration) {
@@ -76,7 +92,14 @@ public class Task {
     }
 
     public LocalDateTime getStartTime() {
+        if (startTime == null) {
+            throw new IllegalStateException("Время старта задачи не задано.");
+        }
         return startTime;
+    }
+
+    public Optional<LocalDateTime> getStartTimeCheck() {
+        return Optional.ofNullable(startTime);
     }
 
     public void setStartTime(LocalDateTime startTime) {

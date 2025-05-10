@@ -1,6 +1,9 @@
-id,type,name,status,description,epic
-1, EPIC, Test epic, NEW, Test description, 40
-5, EPIC, Test 2, NEW, Test description 2, 10
-2, SUBTASK, test subtask 1, IN_PROGRESS, test subtask description 1, 10, 1
-3, SUBTASK, test subtask 2, DONE, test subtask description 2, 10, 1
-4, SUBTASK, test subtask 3, NEW, test subtask description 3, 10, 1
+id,type,name,status,description,startTime,duration,epic
+8,TASK,Test task,NEW,Test Task Description,null,0
+1,EPIC,Test epic,IN_PROGRESS,Test description,null
+5,EPIC,Test 2,NEW,Test description 2,null
+6,EPIC,Test 12,NEW,Test description 12,null
+2,SUBTASK,test subtask 1,IN_PROGRESS,test subtask description 1,null,0,1
+3,SUBTASK,test subtask 2,DONE,test subtask description 2,null,0,1
+4,SUBTASK,test subtask 3,NEW,test subtask description 3,null,0,1
+7,SUBTASK,test subtask 12,NEW,test subtask description 12,null,0,6

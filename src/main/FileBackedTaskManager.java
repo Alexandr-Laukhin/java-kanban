@@ -51,11 +51,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     parentEpic.getSubTasksID().add(subTask.getId());
                 }
             }
-            // Тут по заданию тоже, по идее, нужно заменить цикл на лямбду, но она получается более громоздкой,
-            // чем цикл в данном случае (сам я не смог, если честно, полазил в интернете, и спросил нейронку,
-            // она выдала какое-то чудовище, которое я едва понял, и решил, что  тут оставлю как есть до
-            // особого распоряжения.) Если нужно, напиши, переделаю в лямбду.)))
-
         } catch (IOException e) {
             throw new ManagerLoadException("Ошибка загрузки задач из файла");
         }
@@ -63,74 +58,53 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        try (Writer fileWriter = new FileWriter(saveFileName)) {
-            fileWriter.write("id,type,name,status,description,epic\n");
 
-            Stream.of(getTasks(), getEpics(), getSubTasks())
-                    .flatMap(Collection::stream)
-                    .map(TaskConverter::toString)
-                    .collect(Collectors.collectingAndThen(
-                            Collectors.joining("\n"),
-                            convertedTasks  -> {
-                                try {
-                                    fileWriter.write(convertedTasks);
-                                } catch (IOException e) {
-                                    throw new ManagerSaveException("Ошибка сохранения в потоке конвертации");
-                                }
-                                return convertedTasks;
-                            }
-                    ));
+        try (Writer fileWriter = new FileWriter(saveFileName)) {
+
+            fileWriter.write("id,type,name,status,description,startTime,duration,epic\n");
+
+            if (!getTasks().isEmpty()) {
+                fileWriter.write(getTasks().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
+            }
+
+            if (!getEpics().isEmpty()) {
+                fileWriter.write("\n");
+                fileWriter.write(getEpics().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
+            }
+
+            if (!getSubTasks().isEmpty()) {
+                fileWriter.write("\n");
+                fileWriter.write(getSubTasks().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
+            }
+
+
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения");
         }
-    }  // тут пытался сделать красиво, но не уверен, что вышло визуально проще, чем было раньше.
-    // есть еще альтернативный вариант, изначально как делал, без объединения потоков.(ниже его тоже прописал как комментарий)
-    // и еще, помоги, пожалуйста, решить проблему с исключениями, у меня опять коробка в коробке получилась, а я в упор не вижу, как это решить
-
-
-
-//    private void save() {  // альтернативный вариант. выглядит понятнее (ну для меня, по крайней мере),
-//                           //но мне не нравились одинаковые действия по конвертации, и хотелось их сделать в одном потоке
-//
-//        try (Writer fileWriter = new FileWriter(saveFileName)) {
-//
-//            fileWriter.write("id,type,name,status,description,epic\n");
-//
-//            String convertedTasks = getTasks().stream()
-//                    .map(TaskConverter::toString)
-//                    .collect(Collectors.joining("\n"));
-//
-//            String convertedEpics = getEpics().stream()
-//                    .map(TaskConverter::toString)
-//                    .collect(Collectors.joining("\n"));
-//
-//            String convertedSubTasks = getSubTasks().stream()
-//                    .map(TaskConverter::toString)
-//                    .collect(Collectors.joining("\n"));
-//
-//            fileWriter.write(convertedTasks + convertedEpics + convertedSubTasks);
-//
-//        } catch (IOException e) {
-//            throw new ManagerSaveException("Ошибка сохранения");
-//        }
-//    }
+    }
 
 
     @Override
-    public void createTask(Task task) {
-        super.createTask(task);
+    public void createTask(Task task, TaskManager taskManager) {
+        super.createTask(task, taskManager);
         save();
     }
 
     @Override
-    public void createEpic(Epic epic) {
-        super.createEpic(epic);
+    public void createEpic(Epic epic, TaskManager taskManager) {
+        super.createEpic(epic, taskManager);
         save();
     }
 
     @Override
-    public void createSubTask(SubTask subTask) {
-        super.createSubTask(subTask);
+    public void createSubTask(SubTask subTask, TaskManager taskManager) {
+        super.createSubTask(subTask, taskManager);
         save();
     }
 
@@ -171,20 +145,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
-        super.updateTask(task);
+    public void updateTask(Task task, TaskManager taskManager) {
+        super.updateTask(task, taskManager);
         save();
     }
 
     @Override
-    public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
+    public void updateEpic(Epic epic, TaskManager taskManager) {
+        super.updateEpic(epic, taskManager);
         save();
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) {
-        super.updateSubTask(subTask);
+    public void updateSubTask(SubTask subTask, TaskManager taskManager) {
+        super.updateSubTask(subTask, taskManager);
         save();
     }
 }

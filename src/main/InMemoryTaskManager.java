@@ -17,33 +17,46 @@ public class InMemoryTaskManager implements TaskManager {
     protected TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     @Override
-    public void createTask(Task task) {
-        if (intersectionCheck(task)) {
-            System.out.println("Есть пересечения по времени задачи. Я не знаю, что дальше делать с найденными пересечениями, поэтому просто вывел это сообщение");
-            // return;
-        }
+    public void createTask(Task task, TaskManager taskManager) {
+
+        task.getStartTimeCheck()
+                .filter(startTime -> intersectionCheck(task, taskManager))
+                .ifPresent(startTime -> {
+                    throw new IllegalStateException("Есть пересечения по времени задачи.");
+                });
+
         counter++;
         task.setId(counter);
         tasks.put(counter, task);
+
+        if (task.getStartTimeCheck().isPresent() && task.getDuration() != null) {
+            prioritizedTasks.add(task);
+        }
     }
 
     @Override
-    public void createEpic(Epic epic) {
-        if (intersectionCheck(epic)) {
-            System.out.println("Есть пересечения по времени эпика");
-            // return;
-        }
+    public void createEpic(Epic epic, TaskManager taskManager) {
+
+        epic.getStartTimeCheck()
+                .filter(startTime -> intersectionCheck(epic, taskManager))
+                .ifPresent(startTime -> {
+                    throw new IllegalStateException("Есть пересечения по времени эпика.");
+                });
+
         counter++;
         epic.setId(counter);
         epics.put(counter, epic);
     }
 
     @Override
-    public void createSubTask(SubTask subTask) {
-        if (intersectionCheck(subTask)) {
-            System.out.println("Есть пересечения по времени подзадачи");
-            // return;
-        }
+    public void createSubTask(SubTask subTask, TaskManager taskManager) {
+
+        subTask.getStartTimeCheck()
+                .filter(startTime -> intersectionCheck(subTask, taskManager))
+                .ifPresent(startTime -> {
+                    throw new IllegalStateException("Есть пересечения по времени подзадачи.");
+                });
+
         counter++;
         subTask.setId(counter);
         subTasks.put(counter, subTask);
@@ -51,8 +64,14 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (epics.containsKey(subTask.getParentID()) && epic != null) {
             epic.addSubTaskToList(counter);
-            epic.setDuration(epic.getDuration().plus(subTask.getDuration()));
             checkEpicStatus(subTask.getParentID());
+            // Тут был комментарий про расчет времени эпика. Я его реализовал в самом эпике, поэтому тут в нем нет
+            // необходимости. Мне показалось, что в эпике он будет более уместен, на случай если поля эпика или
+            // сабтасок будут изменены вручную. Чтобы не было привязки именно к методу создания подзадачи.
+        }
+
+        if (subTask.getStartTimeCheck().isPresent() && subTask.getDurationCheck().isPresent()) {
+            prioritizedTasks.add(subTask);
         }
     }
 
@@ -86,6 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTasks() {
         tasks.keySet().forEach(historyManager::remove);
+        tasks.values().forEach(prioritizedTasks::remove);
         tasks.clear();
     }
 
@@ -100,18 +120,23 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteSubTasks() {
         subTasks.keySet().forEach(historyManager::remove);
+        subTasks.values().forEach(prioritizedTasks::remove);
         subTasks.clear();
         epics.values().forEach(epic -> {
             epic.getSubTasksID().clear();
             checkEpicStatus(epic.getId());
         });
-
     }
 
     @Override
     public void deleteTaskByID(int taskID) {
+        Task task = tasks.get(taskID);
         tasks.remove(taskID);
         historyManager.remove(taskID);
+
+        if (task.getStartTimeCheck().isPresent() && task.getDurationCheck().isPresent()) {
+            prioritizedTasks.remove(task);
+        }
     }
 
     @Override
@@ -129,12 +154,17 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteSubTaskByID(int subTaskID) {
 
-        int epicId = subTasks.get(subTaskID).getParentID();
+        SubTask subTask = subTasks.get(subTaskID);
+        int epicId = subTask.getParentID();
         epics.get(epicId).getSubTasksID().remove(Integer.valueOf(subTaskID));
 
         subTasks.remove(subTaskID);
         checkEpicStatus(epicId);
         historyManager.remove(subTaskID);
+
+        if (subTask.getStartTimeCheck().isPresent() && subTask.getDurationCheck().isPresent()) {
+            prioritizedTasks.remove(subTask);
+        }
     }
 
     @Override
@@ -159,32 +189,49 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
-        if (intersectionCheck(task)) {
-            System.out.println("Есть пересечения по времени задачи");
-            //return;
-        }
+    public void updateTask(Task task, TaskManager taskManager) {
+
+        task.getStartTimeCheck()
+                .filter(startTime -> intersectionCheck(task, taskManager))
+                .ifPresent(startTime -> {
+                    throw new IllegalStateException("Есть пересечения по времени задачи.");
+                });
+
         tasks.put(task.getId(), task);
+
+        if (task.getStartTimeCheck().isPresent() && task.getDuration() != null) {
+            prioritizedTasks.add(task);
+        }
     }
 
     @Override
-    public void updateEpic(Epic epic) {
-        if (intersectionCheck(epic)) {
-            System.out.println("Есть пересечения по времени эпика");
-            //return;
-        }
+    public void updateEpic(Epic epic, TaskManager taskManager) {
+
+        epic.getStartTimeCheck()
+                .filter(startTime -> intersectionCheck(epic, taskManager))
+                .ifPresent(startTime -> {
+                    throw new IllegalStateException("Есть пересечения по времени эпика.");
+                });
+
         epics.put(epic.getId(), epic);
         checkEpicStatus(epic.getId());
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) {
-        if (intersectionCheck(subTask)) {
-            System.out.println("Есть пересечения по времени подзадачи");
-            //return;
-        }
+    public void updateSubTask(SubTask subTask, TaskManager taskManager) {
+
+        subTask.getStartTimeCheck()
+                .filter(startTime -> intersectionCheck(subTask, taskManager))
+                .ifPresent(startTime -> {
+                    throw new IllegalStateException("Есть пересечения по времени подзадачи.");
+                });
+
         subTasks.put(subTask.getId(), subTask);
         checkEpicStatus(subTask.getParentID());
+
+        if (subTask.getStartTimeCheck().isPresent() && subTask.getDurationCheck().isPresent()) {
+            prioritizedTasks.add(subTask);
+        }
     }
 
     private void checkEpicStatus(int epicID) {
@@ -212,30 +259,12 @@ public class InMemoryTaskManager implements TaskManager {
         );
     }
 
-    public TreeSet<Task> getPrioritizedTasks() {
-        prioritizedTasks.clear();
-        Stream.of(tasks.values(), epics.values(), subTasks.values())
-                .forEach(prioritizedTasks::addAll);
-        return prioritizedTasks;
-    }
+    public boolean notIntersection(Task task1, Task task2, TaskManager taskManager) {
+        return task1.getStartTime().isAfter(task2.getEndTime(taskManager)) || task1.getEndTime(taskManager).isBefore(task2.getStartTime());
+    } // Если возвращает true, значит нет пересечения.
 
-    public boolean segmentIntersection(Task task1, Task task2) {
-        boolean ifT1isBeforeT2 = task1.getStartTime().isBefore(task2.getStartTime()) && task1.getEndTime().isAfter(task2.getStartTime());
-        boolean ifT1isAfterT2 = task2.getStartTime().isBefore(task1.getStartTime()) && task2.getEndTime().isAfter(task1.getStartTime());
-        boolean ifT1equalsT2 = task1.equals(task2);
-
-        return ifT1isBeforeT2 || ifT1isAfterT2 || ifT1equalsT2;
-    } // Если возвращает true, значит есть пересечения.
-
-    public boolean intersectionCheck(Task task1) {
-
-        ArrayList<Task> prioritizedTasksArray = new ArrayList<>(getPrioritizedTasks());
-
-//        if (prioritizedTasksArray.size() < 2) {
-//            return false;
-//        }
-
-        return IntStream.range(0, prioritizedTasksArray.size())
-                .anyMatch(i -> segmentIntersection(prioritizedTasksArray.get(i), task1));
+    public boolean intersectionCheck(Task task1, TaskManager taskManager) {
+        return prioritizedTasks.stream()
+                .anyMatch(task -> !notIntersection(task, task1, taskManager));
     } // Если возвращает true, значит есть пересечения.
 }

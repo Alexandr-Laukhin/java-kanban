@@ -1,18 +1,16 @@
 package classes;
 
-import java.time.Duration;
-
 public class SubTask extends Task {
 
     private int parentID;
 
-    public SubTask(String name, String description, Duration inMinutes, int parentID) {
-        super(name, description, inMinutes);
+    public SubTask(String name, String description, int parentID) {
+        super(name, description);
         this.parentID = parentID;
     }
 
-    public SubTask(String name, String description, Status status, int id, Duration inMinutes, int parentID) {
-        super(name, description, status, id, inMinutes);
+    public SubTask(String name, String description, Status status, int id, int parentID) {
+        super(name, description, status, id);
         this.parentID = parentID;
     }
 
