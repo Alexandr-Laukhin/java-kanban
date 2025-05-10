@@ -19,7 +19,6 @@ public class Main {
         TaskManager taskManager = new InMemoryTaskManager();
         TaskManager backedTaskManager = new FileBackedTaskManager(file);
 
-
         Epic epic1 = new Epic("Test epic", "Test description");
         Epic epic12 = new Epic("Test 12", "Test description 12");
         SubTask subTask1 = new SubTask("test subtask 1", "test subtask description 1", 1);
@@ -67,7 +66,6 @@ public class Main {
         backedTaskManager.getSubTaskByID(2);
         backedTaskManager.getHistory();
 
-
         System.out.println(backedTaskManager.getHistory());
         List<Task> firstArray = backedTaskManager.getHistory();
         for (Task arrayTask : firstArray) {
@@ -96,8 +94,4 @@ public class Main {
             System.out.println(arrayTask.getName());
         }
     }
-
 }
-
-
-

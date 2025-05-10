@@ -29,7 +29,6 @@ public class TaskConverter {
                     task.getId(), task.getType(), task.getName(), task.getStatus(), task.getDescription(), startTime, duration,
                     ((SubTask) task).getParentID());
         };
-
     }
 
     public static Task fromString(String value) {

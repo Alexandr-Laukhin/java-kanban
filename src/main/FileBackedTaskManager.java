@@ -3,9 +3,7 @@ package main;
 import classes.*;
 
 import java.io.*;
-import java.util.Collection;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static classes.TaskConverter.fromString;
 
