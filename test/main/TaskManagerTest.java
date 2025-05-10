@@ -6,23 +6,23 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TaskManagerTest {
+public abstract class TaskManagerTest<T extends TaskManager> {
 
-    private TaskManager testTaskManager;
-    private Task testTask;
-    private Epic testEpic;
-    private SubTask testSubTask;
-
+    protected Task testTask;
+    protected Epic testEpic;
+    protected SubTask testSubTask;
+    protected T testTaskManager;
+    protected abstract T createTaskManager();
 
     @BeforeEach
     void createTestTaskManager() {
-        testTaskManager = Managers.getDefault();
+        testTaskManager = createTaskManager();
         testTask = new Task("Test task", "Test Task Description");
-        testTaskManager.createTask(testTask);
+        testTaskManager.createTask(testTask, testTaskManager);
         testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
+        testTaskManager.createEpic(testEpic, testTaskManager);
         testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
-        testTaskManager.createSubTask(testSubTask);
+        testTaskManager.createSubTask(testSubTask, testTaskManager);
     }
 
     @Test
@@ -43,7 +43,7 @@ class TaskManagerTest {
     @Test
     void deleteTasks() {
         Task testTask2 = new Task("Test task2", "Test Task Description2");
-        testTaskManager.createTask(testTask2);
+        testTaskManager.createTask(testTask2, testTaskManager);
         testTaskManager.getTaskByID(1);
         testTaskManager.getTaskByID(4);
         testTaskManager.getSubTaskByID(3);
@@ -52,7 +52,6 @@ class TaskManagerTest {
 
         assertEquals(1, testTaskManager.getHistory().size());
         assertEquals(0, testTaskManager.getTasks().size());
-
     }
 
     @Test
@@ -91,9 +90,9 @@ class TaskManagerTest {
     @Test
     void deleteEpicByID() {
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
+        testTaskManager.createEpic(testEpic, testTaskManager);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 4);
-        testTaskManager.createSubTask(testSubTask);
+        testTaskManager.createSubTask(testSubTask, testTaskManager);
 
         testTaskManager.getEpicByID(2);
         testTaskManager.getEpicByID(4);
@@ -108,9 +107,9 @@ class TaskManagerTest {
     @Test
     void deleteSubTaskByID() {
         Epic testEpic = new Epic("Test epic", "Test Epic Description");
-        testTaskManager.createEpic(testEpic);
+        testTaskManager.createEpic(testEpic, testTaskManager);
         SubTask testSubTask = new SubTask("Test subTask", "Test SubTask Description", 2);
-        testTaskManager.createSubTask(testSubTask);
+        testTaskManager.createSubTask(testSubTask, testTaskManager);
 
         testTaskManager.getSubTaskByID(3);
         testTaskManager.getSubTaskByID(5);

@@ -1,6 +1,8 @@
 import classes.*;
 import classes.Status;
 import main.FileBackedTaskManager;
+import main.InMemoryTaskManager;
+import main.TaskManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +16,8 @@ public class Main {
 
         String saveTasks = "taskSaves.csv";
         File file = new File(saveTasks);
-        // InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        FileBackedTaskManager backedTaskManager = new FileBackedTaskManager(file);
-
+        TaskManager taskManager = new InMemoryTaskManager();
+        TaskManager backedTaskManager = new FileBackedTaskManager(file);
 
         Epic epic1 = new Epic("Test epic", "Test description");
         Epic epic12 = new Epic("Test 12", "Test description 12");
@@ -24,34 +25,34 @@ public class Main {
         SubTask subTask2 = new SubTask("test subtask 2", "test subtask description 2", 1);
         SubTask subTask3 = new SubTask("test subtask 3", "test subtask description 3", 1);
 
-        backedTaskManager.createEpic(epic1);
+        backedTaskManager.createEpic(epic1, backedTaskManager);
 
-        backedTaskManager.createSubTask(subTask1);
-        backedTaskManager.createSubTask(subTask2);
-        backedTaskManager.createSubTask(subTask3);
+        backedTaskManager.createSubTask(subTask1, backedTaskManager);
+        backedTaskManager.createSubTask(subTask2, backedTaskManager);
+        backedTaskManager.createSubTask(subTask3, backedTaskManager);
 
-        // taskManager.deleteSubTasks();
+        taskManager.deleteSubTasks();
 
         Epic epic2 = new Epic("Test 2", "Test description 2");
-        backedTaskManager.createEpic(epic2);
-        backedTaskManager.createEpic(epic12);
+        backedTaskManager.createEpic(epic2, backedTaskManager);
+        backedTaskManager.createEpic(epic12, backedTaskManager);
 
         SubTask subTask12 = new SubTask("test subtask 12", "test subtask description 12", 6);
-        backedTaskManager.createSubTask(subTask12);
+        backedTaskManager.createSubTask(subTask12, backedTaskManager);
 
         subTask1.setStatus(Status.IN_PROGRESS);
         subTask2.setStatus(Status.DONE);
         subTask3.setStatus(Status.DONE);
 
-        backedTaskManager.updateSubTask(subTask1);
-        backedTaskManager.updateSubTask(subTask2);
-        backedTaskManager.updateSubTask(subTask3);
+        backedTaskManager.updateSubTask(subTask1, backedTaskManager);
+        backedTaskManager.updateSubTask(subTask2, backedTaskManager);
+        backedTaskManager.updateSubTask(subTask3, backedTaskManager);
 
         subTask3.setStatus(Status.NEW);
-        backedTaskManager.updateSubTask(subTask3);
+//        backedTaskManager.updateSubTask(subTask3);
 
         Task taskTest = new Task("Test task", "Test Task Description");
-        backedTaskManager.createTask(taskTest);
+        backedTaskManager.createTask(taskTest, backedTaskManager);
         backedTaskManager.getTaskByID(8);
 
         backedTaskManager.getEpicByID(1);
@@ -64,7 +65,6 @@ public class Main {
         backedTaskManager.getSubTaskByID(2);
         backedTaskManager.getSubTaskByID(2);
         backedTaskManager.getHistory();
-
 
         System.out.println(backedTaskManager.getHistory());
         List<Task> firstArray = backedTaskManager.getHistory();
@@ -94,7 +94,4 @@ public class Main {
             System.out.println(arrayTask.getName());
         }
     }
-
 }
-
-

@@ -3,6 +3,7 @@ package main;
 import classes.*;
 
 import java.io.*;
+import java.util.stream.Collectors;
 
 import static classes.TaskConverter.fromString;
 
@@ -18,6 +19,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         FileBackedTaskManager taskManager = new FileBackedTaskManager(file);
         try (Reader fileReader = new FileReader(file);
+
              BufferedReader br = new BufferedReader(fileReader)) {
             br.readLine();
             while (br.ready()) {
@@ -47,7 +49,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     parentEpic.getSubTasksID().add(subTask.getId());
                 }
             }
-
         } catch (IOException e) {
             throw new ManagerLoadException("Ошибка загрузки задач из файла");
         }
@@ -58,43 +59,50 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (Writer fileWriter = new FileWriter(saveFileName)) {
 
-            fileWriter.write("id,type,name,status,description,epic\n");
+            fileWriter.write("id,type,name,status,description,startTime,duration,epic\n");
 
-            for (Task taskObject : getTasks()) {
-                String convertedTask = TaskConverter.toString(taskObject);
-                fileWriter.write(convertedTask + "\n");
+            if (!getTasks().isEmpty()) {
+                fileWriter.write(getTasks().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
             }
 
-            for (Epic epicObject : getEpics()) {
-                String convertedEpic = TaskConverter.toString(epicObject);
-                fileWriter.write(convertedEpic + "\n");
+            if (!getEpics().isEmpty()) {
+                fileWriter.write("\n");
+                fileWriter.write(getEpics().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
             }
 
-            for (SubTask subTaskObject : getSubTasks()) {
-                String convertedSubTask = TaskConverter.toString(subTaskObject);
-                fileWriter.write(convertedSubTask + "\n");
+            if (!getSubTasks().isEmpty()) {
+                fileWriter.write("\n");
+                fileWriter.write(getSubTasks().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
             }
+
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения");
         }
     }
 
+
     @Override
-    public void createTask(Task task) {
-        super.createTask(task);
+    public void createTask(Task task, TaskManager taskManager) {
+        super.createTask(task, taskManager);
         save();
     }
 
     @Override
-    public void createEpic(Epic epic) {
-        super.createEpic(epic);
+    public void createEpic(Epic epic, TaskManager taskManager) {
+        super.createEpic(epic, taskManager);
         save();
     }
 
     @Override
-    public void createSubTask(SubTask subTask) {
-        super.createSubTask(subTask);
+    public void createSubTask(SubTask subTask, TaskManager taskManager) {
+        super.createSubTask(subTask, taskManager);
         save();
     }
 
@@ -135,20 +143,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
-        super.updateTask(task);
+    public void updateTask(Task task, TaskManager taskManager) {
+        super.updateTask(task, taskManager);
         save();
     }
 
     @Override
-    public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
+    public void updateEpic(Epic epic, TaskManager taskManager) {
+        super.updateEpic(epic, taskManager);
         save();
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) {
-        super.updateSubTask(subTask);
+    public void updateSubTask(SubTask subTask, TaskManager taskManager) {
+        super.updateSubTask(subTask, taskManager);
         save();
     }
 }
