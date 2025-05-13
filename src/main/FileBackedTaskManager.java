@@ -49,13 +49,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     parentEpic.getSubTasksID().add(subTask.getId());
                 }
             }
+
         } catch (IOException e) {
             throw new ManagerLoadException("Ошибка загрузки задач из файла");
         }
         return taskManager;
     }
 
-    private void save() {
+    protected void save() {
 
         try (Writer fileWriter = new FileWriter(saveFileName)) {
 
@@ -89,20 +90,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
     @Override
-    public void createTask(Task task, TaskManager taskManager) {
-        super.createTask(task, taskManager);
+    public void createTask(Task task) {
+        super.createTask(task);
         save();
     }
 
     @Override
-    public void createEpic(Epic epic, TaskManager taskManager) {
-        super.createEpic(epic, taskManager);
+    public void createEpic(Epic epic) {
+        super.createEpic(epic);
         save();
     }
 
     @Override
-    public void createSubTask(SubTask subTask, TaskManager taskManager) {
-        super.createSubTask(subTask, taskManager);
+    public void createSubTask(SubTask subTask) {
+        super.createSubTask(subTask);
         save();
     }
 
@@ -143,20 +144,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task, TaskManager taskManager) {
-        super.updateTask(task, taskManager);
+    public void updateTask(Task task) {
+        super.updateTask(task);
         save();
     }
 
     @Override
-    public void updateEpic(Epic epic, TaskManager taskManager) {
-        super.updateEpic(epic, taskManager);
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
         save();
     }
 
     @Override
-    public void updateSubTask(SubTask subTask, TaskManager taskManager) {
-        super.updateSubTask(subTask, taskManager);
+    public void updateSubTask(SubTask subTask) {
+        super.updateSubTask(subTask);
         save();
     }
 }

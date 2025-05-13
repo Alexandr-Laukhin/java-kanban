@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface TaskManager {
 
-    void createTask(Task task, TaskManager taskManager);
+    void createTask(Task task);
 
-    void createEpic(Epic epic, TaskManager taskManager);
+    void createEpic(Epic epic);
 
-    void createSubTask(SubTask subTask, TaskManager taskManager);
+    void createSubTask(SubTask subTask);
 
     ArrayList<Task> getTasks();
 
@@ -43,10 +43,10 @@ public interface TaskManager {
 
     SubTask getSubTaskByID(int subTaskID);
 
-    void updateTask(Task task, TaskManager taskManager);
+    void updateTask(Task task);
 
-    void updateEpic(Epic epic, TaskManager taskManager);
+    void updateEpic(Epic epic);
 
-    void updateSubTask(SubTask subTask, TaskManager taskManager);
+    void updateSubTask(SubTask subTask);
 
 }

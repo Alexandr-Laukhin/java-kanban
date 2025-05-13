@@ -1,7 +1,5 @@
 package main;
 
-import classes.Epic;
-import classes.SubTask;
 import classes.Task;
 import classes.TaskConverter;
 import org.junit.jupiter.api.AfterEach;
@@ -15,10 +13,19 @@ import java.time.LocalDate;
 
 import static classes.TaskConverter.fromString;
 
-class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> {
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
-    protected TaskManager testFileBackedTaskManager;
-    protected Task testTask;
+    // пометка для себя
+    // В родителе перед каждым создается:
+    // testTaskManager
+    // testTaskManager - id 1
+    // testEpic - id 2
+    // testSubTask - id 3 - parentEpic id 2
+    // testTask2 - id 4
+    // testSubTask2 - id 5 - parentEpic id 2
+    // testEpic2 - id 6
+
+
     protected File tempFile;
 
     @Override
@@ -32,13 +39,10 @@ class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> 
     }
 
     @BeforeEach
-    void createManagerAndTask() throws IOException {
-        testTask = new Task("TestTask", "Test description");
-        testTask.setStartTime(LocalDate.now().atTime(13, 0));
+    void setTimeAndDuration() {
+        testTask.setStartTime(LocalDate.of(2025, 5, 10).atTime(13, 0));
         testTask.setDuration(Duration.ofMinutes(10));
-        tempFile = File.createTempFile("testTemp", ".csv");
-        testFileBackedTaskManager = new FileBackedTaskManager(tempFile);
-        testFileBackedTaskManager.createTask(testTask, testFileBackedTaskManager);
+        testTaskManager.save();
     }
 
     @AfterEach
@@ -50,16 +54,19 @@ class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> 
     void testLoadFromFile() {
         FileBackedTaskManager secondManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        Assertions.assertEquals(1, secondManager.getTasks().size());
+        Assertions.assertEquals(2, secondManager.getTasks().size());
     }
 
     @Test
     void saveTest() throws IOException {
+        testTask.setStartTime(LocalDate.of(2025, 5, 10).atTime(13, 0));
+        testTask.setDuration(Duration.ofMinutes(10));
+
         Reader fileReader = new FileReader(tempFile);
         BufferedReader br = new BufferedReader(fileReader);
         br.readLine();
         String line2 = br.readLine();
-        String expectedLine = "1,TASK,TestTask,NEW,Test description,10.05.2025 13:00,10";
+        String expectedLine = "1,TASK,Test task,NEW,Test Task Description,10.05.2025 13:00,10";
 
         Assertions.assertEquals(expectedLine, line2);
     }
@@ -67,7 +74,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> 
     @Test
     void testToString() {
         String line = TaskConverter.toString(testTask);
-        String expectedLine = "1,TASK,TestTask,NEW,Test description,10.05.2025 13:00,10";
+        String expectedLine = "1,TASK,Test task,NEW,Test Task Description,10.05.2025 13:00,10";
 
         Assertions.assertEquals(expectedLine, line);
     }
@@ -96,20 +103,16 @@ class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> 
     @Test
     void loadEmptyFile() throws IOException {
         File emptyFile = File.createTempFile("testEmptyTemp", ".csv");
-        FileBackedTaskManager empryLoad = FileBackedTaskManager.loadFromFile(emptyFile);
+        FileBackedTaskManager emptyLoad = FileBackedTaskManager.loadFromFile(emptyFile);
 
-        Assertions.assertTrue(empryLoad.getTasks().isEmpty());
-        Assertions.assertTrue(empryLoad.getEpics().isEmpty());
-        Assertions.assertTrue(empryLoad.getSubTasks().isEmpty());
+        Assertions.assertTrue(emptyLoad.getTasks().isEmpty());
+        Assertions.assertTrue(emptyLoad.getEpics().isEmpty());
+        Assertions.assertTrue(emptyLoad.getSubTasks().isEmpty());
         emptyFile.delete();
     }
 
     @Test
     void saveSomeTasks() throws IOException {
-        Epic testEpic = new Epic("TestEpic", "Test epic description");
-        testFileBackedTaskManager.createEpic(testEpic, testFileBackedTaskManager);
-        SubTask testSubTask = new SubTask("TestSubTask", "Test subtask description", 2);
-        testFileBackedTaskManager.createSubTask(testSubTask, testFileBackedTaskManager);
         Reader fileReader = new FileReader(tempFile);
         BufferedReader br = new BufferedReader(fileReader);
 
@@ -117,9 +120,9 @@ class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> 
         String line = br.readLine();
         String line2 = br.readLine();
         String line3 = br.readLine();
-        String expectedLine = "1,TASK,TestTask,NEW,Test description,10.05.2025 13:00,10";
-        String expectedLine2 = "2,EPIC,TestEpic,NEW,Test epic description,null";
-        String expectedLine3 = "3,SUBTASK,TestSubTask,NEW,Test subtask description,null,0,2";
+        String expectedLine = "1,TASK,Test task,NEW,Test Task Description,10.05.2025 13:00,10";
+        String expectedLine2 = "4,TASK,Test task2,NEW,Test Task Description2,null,0";
+        String expectedLine3 = "2,EPIC,Test epic,NEW,Test Epic Description,null";
 
         Assertions.assertEquals(expectedLine, line);
         Assertions.assertEquals(expectedLine2, line2);
@@ -128,17 +131,14 @@ class FileBackedTaskManagerTest extends TaskManagerTest <FileBackedTaskManager> 
 
     @Test
     void loadSomeTasks() {
-        Epic testEpic = new Epic("TestEpic", "Test epic description");
         testEpic.setStartTime(LocalDate.now().atTime(14, 0));
-        testFileBackedTaskManager.createEpic(testEpic, testFileBackedTaskManager);
-        SubTask testSubTask = new SubTask("TestSubTask", "Test subtask description", 2);
         testSubTask.setStartTime(LocalDate.now().atTime(14, 1));
         testSubTask.setDuration(Duration.ofMinutes(10));
-        testFileBackedTaskManager.createSubTask(testSubTask, testFileBackedTaskManager);
+        testTaskManager.save();
         FileBackedTaskManager secondManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        Assertions.assertEquals(testFileBackedTaskManager.getTasks(), secondManager.getTasks());
-        Assertions.assertEquals(testFileBackedTaskManager.getEpics(), secondManager.getEpics());
-        Assertions.assertEquals(testFileBackedTaskManager.getSubTasks(), secondManager.getSubTasks());
+        Assertions.assertEquals(testTaskManager.getTasks(), secondManager.getTasks());
+        Assertions.assertEquals(testTaskManager.getEpics(), secondManager.getEpics());
+        Assertions.assertEquals(testTaskManager.getSubTasks(), secondManager.getSubTasks());
     }
 }

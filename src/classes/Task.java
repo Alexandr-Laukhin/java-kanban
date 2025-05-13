@@ -1,7 +1,5 @@
 package classes;
 
-import main.TaskManager;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -15,6 +13,7 @@ public class Task {
     protected int id;
     protected Duration duration;
     protected LocalDateTime startTime;
+    protected LocalDateTime endTime;
 
     public Task(String name, String description) {
         this.name = name;
@@ -28,17 +27,13 @@ public class Task {
         this.id = id;
     }
 
-    public LocalDateTime getEndTime(TaskManager taskManager) {
-        if (startTime == null) {
-            throw new IllegalStateException("Время старта задачи не задано");
-        }
-        if (duration == null) {
-            throw new IllegalStateException("Длительность задачи не задана");
-        }
+    public LocalDateTime getEndTime() {
         return startTime.plus(duration);
-    } // Здесь параметр менеджера не нужен, но он нужен в логике того же метода в эпике. А так как логика сквозная,
-    // и методы написаны одни и те же для тасок, эпиков и сабтасок, я решил добавить этот параметр. Как следствие, он
-    // появляется везде, где идет запрос или проверка на время.
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 
     public String getName() {
         return name;
@@ -77,9 +72,6 @@ public class Task {
     }
 
     public Duration getDuration() {
-        if (duration == null) {
-            throw new IllegalStateException("Длительность задачи не задана.");
-        }
         return duration;
     }
 
@@ -92,9 +84,6 @@ public class Task {
     }
 
     public LocalDateTime getStartTime() {
-        if (startTime == null) {
-            throw new IllegalStateException("Время старта задачи не задано.");
-        }
         return startTime;
     }
 

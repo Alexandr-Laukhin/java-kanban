@@ -25,34 +25,34 @@ public class Main {
         SubTask subTask2 = new SubTask("test subtask 2", "test subtask description 2", 1);
         SubTask subTask3 = new SubTask("test subtask 3", "test subtask description 3", 1);
 
-        backedTaskManager.createEpic(epic1, backedTaskManager);
+        backedTaskManager.createEpic(epic1);
 
-        backedTaskManager.createSubTask(subTask1, backedTaskManager);
-        backedTaskManager.createSubTask(subTask2, backedTaskManager);
-        backedTaskManager.createSubTask(subTask3, backedTaskManager);
+        backedTaskManager.createSubTask(subTask1);
+        backedTaskManager.createSubTask(subTask2);
+        backedTaskManager.createSubTask(subTask3);
 
         taskManager.deleteSubTasks();
 
         Epic epic2 = new Epic("Test 2", "Test description 2");
-        backedTaskManager.createEpic(epic2, backedTaskManager);
-        backedTaskManager.createEpic(epic12, backedTaskManager);
+        backedTaskManager.createEpic(epic2);
+        backedTaskManager.createEpic(epic12);
 
         SubTask subTask12 = new SubTask("test subtask 12", "test subtask description 12", 6);
-        backedTaskManager.createSubTask(subTask12, backedTaskManager);
+        backedTaskManager.createSubTask(subTask12);
 
         subTask1.setStatus(Status.IN_PROGRESS);
         subTask2.setStatus(Status.DONE);
         subTask3.setStatus(Status.DONE);
 
-        backedTaskManager.updateSubTask(subTask1, backedTaskManager);
-        backedTaskManager.updateSubTask(subTask2, backedTaskManager);
-        backedTaskManager.updateSubTask(subTask3, backedTaskManager);
+        backedTaskManager.updateSubTask(subTask1);
+        backedTaskManager.updateSubTask(subTask2);
+        backedTaskManager.updateSubTask(subTask3);
 
         subTask3.setStatus(Status.NEW);
 //        backedTaskManager.updateSubTask(subTask3);
 
         Task taskTest = new Task("Test task", "Test Task Description");
-        backedTaskManager.createTask(taskTest, backedTaskManager);
+        backedTaskManager.createTask(taskTest);
         backedTaskManager.getTaskByID(8);
 
         backedTaskManager.getEpicByID(1);
