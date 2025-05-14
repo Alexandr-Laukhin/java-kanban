@@ -71,6 +71,11 @@ public class InMemoryTaskManager implements TaskManager {
             checkEpicStatus(subTask.getParentID());
         }
         prioritizedTasks.add(subTask);
+
+        if (subTask.getStartTimeCheck().isPresent()) {
+            checkEpicTime(epic);
+        } // Ты написал, что при создании тоже должен быть перерасчет времени эпика. Я сделал, но она тут всегда null
+        // будет, тк при создании startTime  не задается через конструктор, только отдельным методом. Может удалить ее отсюда?
     }
 
     @Override
@@ -124,6 +129,9 @@ public class InMemoryTaskManager implements TaskManager {
         epics.values().forEach(epic -> {
             epic.getSubTasksID().clear();
             checkEpicStatus(epic.getId());
+            epic.setStartTime(null);
+            epic.setDuration(null);
+            epic.setEndTime(null);
         });
     }
 
@@ -133,6 +141,7 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.remove(taskID);
         historyManager.remove(taskID);
         prioritizedTasks.remove(task);
+
     }
 
     @Override
@@ -141,6 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .forEach(subTaskId -> {
                     historyManager.remove(subTaskId);
                     subTasks.remove(subTaskId);
+                    prioritizedTasks.remove(subTasks.get(subTaskId));
                 });
 
         epics.remove(epicID);
@@ -152,12 +162,14 @@ public class InMemoryTaskManager implements TaskManager {
 
         SubTask subTask = subTasks.get(subTaskID);
         int epicId = subTask.getParentID();
-        epics.get(epicId).getSubTasksID().remove(Integer.valueOf(subTaskID));
+        Epic parentEpic = epics.get(epicId);
+        parentEpic.getSubTasksID().remove(Integer.valueOf(subTaskID));
 
         subTasks.remove(subTaskID);
         checkEpicStatus(epicId);
         historyManager.remove(subTaskID);
         prioritizedTasks.remove(subTask);
+        checkEpicTime(parentEpic);
     }
 
     @Override
@@ -191,9 +203,7 @@ public class InMemoryTaskManager implements TaskManager {
                 });
 
         tasks.put(task.getId(), task);
-
         prioritizedTasks.add(task);
-
     }
 
     @Override
@@ -226,22 +236,20 @@ public class InMemoryTaskManager implements TaskManager {
         checkEpicStatus(subTask.getParentID());
         prioritizedTasks.add(subTask);
 
-        if (subTask.getStartTimeCheck().isPresent()) { //если хоть одна подзадача имеет заданное время старта, то мы
-            // можем начинать проверку, и задать эпику самое ранее время старта из подзадачи.
-            // Если такой подзадачи нет, то в дальнейшем коде нет смысла.
-
-            parentEpic.getSubTasksID().stream()
-                    .map(subTaskId -> subTasks.get(subTaskId))
-                    .filter(subTaskInStream -> subTaskInStream.getStartTime() != null)
-                    .min(Comparator.comparing(SubTask::getStartTime))
-                    .ifPresent(earliestSubTask -> parentEpic.setStartTime(earliestSubTask.getStartTime()));
-
-            getEndTime(parentEpic);
+        if (subTask.getStartTimeCheck().isPresent()) {
+            checkEpicTime(parentEpic);
         }
-        // Тут без проверки никак, потому что это расчет длительности эпика. Если не задано стартовое время,
-        // то расчет невозможен. Пришлось написать код, который будет сравнивать время старта всех сабтасок,
-        // выбирать самое ранее из них, и таким образом устанавливать стартовое время эпика. Если это не нужно,
-        // я могу просто вернуть проверку на null, которая будет отсеивать нулевые значения.
+    }
+
+    private void checkEpicTime(Epic epic) {
+
+        epic.getSubTasksID().stream()
+                .map(subTaskId -> subTasks.get(subTaskId))
+                .filter(subTaskInStream -> subTaskInStream.getStartTime() != null)
+                .min(Comparator.comparing(SubTask::getStartTime))
+                .ifPresent(earliestSubTask -> epic.setStartTime(earliestSubTask.getStartTime()));
+
+        //getEndTime(epic);
     }
 
     private void checkEpicStatus(int epicID) {
@@ -305,7 +313,6 @@ public class InMemoryTaskManager implements TaskManager {
             return endTime;
         } else {
             LocalDateTime endTime = task.getStartTime().plus(task.getDuration());
-            task.setEndTime(endTime);
 
             return endTime;
         }
