@@ -74,8 +74,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (subTask.getStartTimeCheck().isPresent()) {
             checkEpicTime(epic);
-        } // Ты написал, что при создании тоже должен быть перерасчет времени эпика. Я сделал, но она тут всегда null
-        // будет, тк при создании startTime  не задается через конструктор, только отдельным методом. Может удалить ее отсюда?
+        }
     }
 
     @Override
@@ -244,12 +243,18 @@ public class InMemoryTaskManager implements TaskManager {
     private void checkEpicTime(Epic epic) {
 
         epic.getSubTasksID().stream()
-                .map(subTaskId -> subTasks.get(subTaskId))
+                .map(subTasks::get)
                 .filter(subTaskInStream -> subTaskInStream.getStartTime() != null)
                 .min(Comparator.comparing(SubTask::getStartTime))
                 .ifPresent(earliestSubTask -> epic.setStartTime(earliestSubTask.getStartTime()));
 
-        //getEndTime(epic);
+        Duration epicDuration = epic.getSubTasksID().stream()
+                .map(subTasks::get)
+                .filter(subTask -> subTask.getDuration() != null)
+                .map(SubTask::getDuration)
+                .reduce(Duration.ZERO, Duration::plus);
+
+        epic.setDuration(epicDuration);
     }
 
     private void checkEpicStatus(int epicID) {
