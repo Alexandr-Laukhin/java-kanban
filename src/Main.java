@@ -1,6 +1,8 @@
 import classes.*;
 import classes.Status;
 import main.FileBackedTaskManager;
+import main.InMemoryTaskManager;
+import main.TaskManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +16,8 @@ public class Main {
 
         String saveTasks = "taskSaves.csv";
         File file = new File(saveTasks);
-        // InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        FileBackedTaskManager backedTaskManager = new FileBackedTaskManager(file);
-
+        TaskManager taskManager = new InMemoryTaskManager();
+        TaskManager backedTaskManager = new FileBackedTaskManager(file);
 
         Epic epic1 = new Epic("Test epic", "Test description");
         Epic epic12 = new Epic("Test 12", "Test description 12");
@@ -30,7 +31,7 @@ public class Main {
         backedTaskManager.createSubTask(subTask2);
         backedTaskManager.createSubTask(subTask3);
 
-        // taskManager.deleteSubTasks();
+        taskManager.deleteSubTasks();
 
         Epic epic2 = new Epic("Test 2", "Test description 2");
         backedTaskManager.createEpic(epic2);
@@ -48,7 +49,7 @@ public class Main {
         backedTaskManager.updateSubTask(subTask3);
 
         subTask3.setStatus(Status.NEW);
-        backedTaskManager.updateSubTask(subTask3);
+//        backedTaskManager.updateSubTask(subTask3);
 
         Task taskTest = new Task("Test task", "Test Task Description");
         backedTaskManager.createTask(taskTest);
@@ -64,7 +65,6 @@ public class Main {
         backedTaskManager.getSubTaskByID(2);
         backedTaskManager.getSubTaskByID(2);
         backedTaskManager.getHistory();
-
 
         System.out.println(backedTaskManager.getHistory());
         List<Task> firstArray = backedTaskManager.getHistory();
@@ -94,7 +94,4 @@ public class Main {
             System.out.println(arrayTask.getName());
         }
     }
-
 }
-
-

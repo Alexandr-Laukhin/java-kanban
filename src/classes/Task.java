@@ -1,13 +1,18 @@
 package classes;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
 
-    private String name;
-    private String description;
-    private Status status = Status.NEW;
-    private int id;
+    protected String name;
+    protected String description;
+    protected Status status = Status.NEW;
+    protected int id;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
     public Task(String name, String description) {
         this.name = name;
@@ -19,6 +24,19 @@ public class Task {
         this.description = description;
         this.status = status;
         this.id = id;
+    }
+
+    public Task(String name, String description, Status status, int id, LocalDateTime startTime, Duration duration) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.id = id;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
     }
 
     public String getName() {
@@ -55,6 +73,30 @@ public class Task {
 
     public void setId(int counter) {
         this.id = counter;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public Optional<Duration> getDurationCheck() {
+        return Optional.ofNullable(duration);
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public Optional<LocalDateTime> getStartTimeCheck() {
+        return Optional.ofNullable(startTime);
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
     @Override
