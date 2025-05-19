@@ -255,6 +255,12 @@ public class InMemoryTaskManager implements TaskManager {
                 .reduce(Duration.ZERO, Duration::plus);
 
         epic.setDuration(epicDuration);
+
+        epic.getSubTasksID().stream()
+                .map(subTasks::get)
+                .filter(subTaskInStream -> subTaskInStream.getStartTime() != null && subTaskInStream.getDuration() != null)
+                .max(Comparator.comparing((SubTask::getEndTime)))
+                .ifPresent(latestSubTask -> epic.setEndTime(latestSubTask.getEndTime()));
     }
 
     private void checkEpicStatus(int epicID) {
