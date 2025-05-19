@@ -3,6 +3,7 @@ package main;
 import classes.*;
 
 import java.io.*;
+import java.util.stream.Collectors;
 
 import static classes.TaskConverter.fromString;
 
@@ -18,6 +19,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         FileBackedTaskManager taskManager = new FileBackedTaskManager(file);
         try (Reader fileReader = new FileReader(file);
+
              BufferedReader br = new BufferedReader(fileReader)) {
             br.readLine();
             while (br.ready()) {
@@ -54,31 +56,38 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return taskManager;
     }
 
-    private void save() {
+    protected void save() {
 
         try (Writer fileWriter = new FileWriter(saveFileName)) {
 
-            fileWriter.write("id,type,name,status,description,epic\n");
+            fileWriter.write("id,type,name,status,description,startTime,duration,epic\n");
 
-            for (Task taskObject : getTasks()) {
-                String convertedTask = TaskConverter.toString(taskObject);
-                fileWriter.write(convertedTask + "\n");
+            if (!getTasks().isEmpty()) {
+                fileWriter.write(getTasks().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
             }
 
-            for (Epic epicObject : getEpics()) {
-                String convertedEpic = TaskConverter.toString(epicObject);
-                fileWriter.write(convertedEpic + "\n");
+            if (!getEpics().isEmpty()) {
+                fileWriter.write("\n");
+                fileWriter.write(getEpics().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
             }
 
-            for (SubTask subTaskObject : getSubTasks()) {
-                String convertedSubTask = TaskConverter.toString(subTaskObject);
-                fileWriter.write(convertedSubTask + "\n");
+            if (!getSubTasks().isEmpty()) {
+                fileWriter.write("\n");
+                fileWriter.write(getSubTasks().stream()
+                        .map(TaskConverter::toString)
+                        .collect(Collectors.joining("\n")));
             }
+
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения");
         }
     }
+
 
     @Override
     public void createTask(Task task) {

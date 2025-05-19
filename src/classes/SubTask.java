@@ -1,5 +1,8 @@
 package classes;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class SubTask extends Task {
 
     private int parentID;
@@ -11,6 +14,11 @@ public class SubTask extends Task {
 
     public SubTask(String name, String description, Status status, int id, int parentID) {
         super(name, description, status, id);
+        this.parentID = parentID;
+    }
+
+    public SubTask(String name, String description, Status status, int id, int parentID, LocalDateTime startTime, Duration duration) {
+        super(name, description, status, id, startTime, duration);
         this.parentID = parentID;
     }
 
