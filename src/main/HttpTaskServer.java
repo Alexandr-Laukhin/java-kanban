@@ -9,14 +9,14 @@ import java.net.InetSocketAddress;
 
 public class HttpTaskServer {
 
-    private int port = 8080;
+    private static final int PORT = 8080;
     private HttpServer server;
     private TaskManager taskManager;
     private Handlers handlers;
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
         this.taskManager = taskManager;
-        this.server = HttpServer.create(new InetSocketAddress(port), 0);
+        this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
         this.handlers = new Handlers(taskManager);
         createHandlers();
     }
