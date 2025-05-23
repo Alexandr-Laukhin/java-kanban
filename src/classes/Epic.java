@@ -1,10 +1,14 @@
 package classes;
 
+import classes.jsonAdapters.LocalDateTimeAdapter;
+import com.google.gson.annotations.JsonAdapter;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Epic extends Task {
 
+    @JsonAdapter(LocalDateTimeAdapter.class)
     private LocalDateTime endTime;
     private ArrayList<Integer> subTasksID = new ArrayList<>();
 
@@ -35,5 +39,10 @@ public class Epic extends Task {
     @Override
     public TaskTypes getType() {
         return TaskTypes.EPIC;
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 }
