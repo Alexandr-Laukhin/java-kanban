@@ -1,14 +1,15 @@
-package classes;
+package classes.handlers;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import main.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-public class BaseHttpHandler {
+public abstract class BaseHttpHandler implements HttpHandler {
     protected final Gson gson = new Gson();
     protected final TaskManager taskManager;
 

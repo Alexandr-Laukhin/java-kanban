@@ -2,6 +2,7 @@ package main;
 
 import classes.*;
 
+import classes.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -11,13 +12,20 @@ public class HttpTaskServer {
 
     private static final int PORT = 8080;
     private HttpServer server;
-    private TaskManager taskManager;
-    private Handlers handlers;
+    private TasksHandler tasksHandler;
+    private EpicsHandler epicsHandler;
+    private SubTaskHandler subTaskHandler;
+    private HistoryHandler historyHandler;
+    private PrioritizedHandler prioritizedHandler;
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
-        this.taskManager = taskManager;
         this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
-        this.handlers = new Handlers(taskManager);
+        this.tasksHandler = new TasksHandler(taskManager);
+        this.epicsHandler = new EpicsHandler(taskManager);
+        this.subTaskHandler = new SubTaskHandler(taskManager);
+        this.historyHandler = new HistoryHandler(taskManager);
+        this.prioritizedHandler = new PrioritizedHandler(taskManager);
+
         createHandlers();
     }
 
@@ -28,11 +36,12 @@ public class HttpTaskServer {
     }
 
     private void createHandlers() {
-        server.createContext("/tasks", handlers.getTasksHandler());
-        server.createContext("/subtasks", handlers.getSubTasksHandler());
-        server.createContext("/epics", handlers.getEpicsHandler());
-        server.createContext("/history", handlers.getHistoryHandler());
-        server.createContext("/prioritized", handlers.getPrioritizedHandler());
+
+        server.createContext("/tasks", tasksHandler);
+        server.createContext("/epics", epicsHandler);
+        server.createContext("/subTasks", subTaskHandler);
+        server.createContext("/history", historyHandler);
+        server.createContext("/prioritized", prioritizedHandler);
     }
 
     public void start() {
@@ -43,5 +52,3 @@ public class HttpTaskServer {
         server.stop(0);
     }
 }
-
-
