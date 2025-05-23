@@ -226,4 +226,35 @@ class HttpTaskServerTest {
         assertEquals(200, response2.statusCode());
         assertTrue(response2.body().contains("[]"));
     }
+
+    @Test
+    void testPrioritizedEndpointGET() throws Exception {
+        Task task = new Task("Test task", "Test task description");
+        taskManager.createTask(task);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/prioritized"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Test task"));
+    }
+
+    @Test
+    void testHistoryEndpointGET() throws Exception {
+        Task task = new Task("Test task", "Test task description");
+        taskManager.createTask(task);
+        taskManager.getTaskByID(task.getId());
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/history"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Test task"));
+    }
 }
