@@ -1,11 +1,14 @@
 package classes.handlers;
 
 import classes.Epic;
+import classes.SubTask;
 import classes.exceptions.*;
 import com.sun.net.httpserver.HttpExchange;
 import main.TaskManager;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class EpicsHandler extends BaseHttpHandler {
     public EpicsHandler(TaskManager taskManager) {
@@ -22,6 +25,8 @@ public class EpicsHandler extends BaseHttpHandler {
                 case "GET" -> {
                     if (path.equals("/epics")) {
                         handleGetAllEpics(exchange);
+                    } else if (path.matches("/epics/\\d+/epicSubTasks")) {
+                        handleGetEpicSubTasks(exchange);
                     } else if (path.matches("/epics/\\d+")) {
                         handleGetEpicById(exchange);
                     }
@@ -73,5 +78,13 @@ public class EpicsHandler extends BaseHttpHandler {
     private int extractId(HttpExchange exchange) {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
         return Integer.parseInt(pathParts[2]);
+    }
+
+    private void handleGetEpicSubTasks(HttpExchange exchange) throws IOException {
+        int epicId = extractId(exchange);
+        List<SubTask> epicSubTasks = taskManager.getEpicByID(epicId).getSubTasksID().stream()
+                .map(taskManager::getSubTaskByID)
+                .collect(Collectors.toList());
+        sendJson(exchange, 200, epicSubTasks);
     }
 }

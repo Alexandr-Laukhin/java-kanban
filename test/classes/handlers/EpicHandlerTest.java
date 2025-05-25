@@ -2,6 +2,7 @@ package classes.handlers;
 
 import classes.Epic;
 import classes.Managers;
+import classes.SubTask;
 import com.google.gson.Gson;
 import main.HttpTaskServer;
 import main.TaskManager;
@@ -71,6 +72,22 @@ public class EpicHandlerTest {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("Test epic"));
+    }
+
+    @Test
+    void testEpicsEndpointGETSubTasks() throws Exception {
+
+        SubTask subTask = new SubTask("Test subTask", "Test subTask description", 1);
+        taskManager.createSubTask(subTask);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/epics/1/epicSubTasks"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Test subTask"));
     }
 
     @Test
