@@ -1,7 +1,7 @@
 package classes.handlers;
 
 import classes.Epic;
-import classes.Exeptions;
+import classes.exceptions.*;
 import com.sun.net.httpserver.HttpExchange;
 import main.TaskManager;
 
@@ -44,7 +44,7 @@ public class EpicsHandler extends BaseHttpHandler {
         try {
             Epic epic = taskManager.getEpicByID(id);
             sendJson(exchange, 200, epic);
-        } catch (Exeptions.NotFoundException e) {
+        } catch (NotFoundException e) {
             sendError(exchange, 404, "Epic not found");
         }
     }
@@ -59,7 +59,7 @@ public class EpicsHandler extends BaseHttpHandler {
                 taskManager.updateEpic(epic);
                 sendJson(exchange, 201, epic);
             }
-        } catch (Exeptions.NotAcceptableExeption e) {
+        } catch (NotAcceptableException e) {
             sendError(exchange, 406, "Not Acceptable");
         }
     }

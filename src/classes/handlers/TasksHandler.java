@@ -1,7 +1,7 @@
 package classes.handlers;
 
-import classes.Exeptions;
 import classes.Task;
+import classes.exceptions.*;
 import com.sun.net.httpserver.HttpExchange;
 import main.TaskManager;
 
@@ -44,7 +44,7 @@ public class TasksHandler extends BaseHttpHandler {
         try {
             Task task = taskManager.getTaskByID(id);
             sendJson(exchange, 200, task);
-        } catch (Exeptions.NotFoundException e) {
+        } catch (NotFoundException e) {
             sendError(exchange, 404, "Task not found");
         }
     }
@@ -59,7 +59,7 @@ public class TasksHandler extends BaseHttpHandler {
                 taskManager.updateTask(task);
                 sendJson(exchange, 201, task);
             }
-        } catch (Exeptions.NotAcceptableExeption e) {
+        } catch (NotAcceptableException e) {
             sendError(exchange, 406, "Not Acceptable");
         }
     }

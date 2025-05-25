@@ -5,12 +5,13 @@ import com.google.gson.annotations.JsonAdapter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
 
     @JsonAdapter(LocalDateTimeAdapter.class)
     private LocalDateTime endTime;
-    private ArrayList<Integer> subTasksID = new ArrayList<>();
+    private List<Integer> subTasksID = new ArrayList<>();
 
     public Epic(String name, String description) {
         super(name, description);
@@ -20,7 +21,7 @@ public class Epic extends Task {
         super(name, description, status, id);
     }
 
-    public ArrayList<Integer> getSubTasksID() {
+    public List<Integer> getSubTasksID() {
         return subTasksID;
     }
 

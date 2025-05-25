@@ -1,6 +1,6 @@
 package classes.handlers;
 
-import classes.Exeptions;
+import classes.exceptions.*;
 import classes.SubTask;
 import com.sun.net.httpserver.HttpExchange;
 import main.TaskManager;
@@ -44,7 +44,7 @@ public class SubTaskHandler extends BaseHttpHandler {
         try {
             SubTask subTask = taskManager.getSubTaskByID(id);
             sendJson(exchange, 200, subTask);
-        } catch (Exeptions.NotFoundException e) {
+        } catch (NotFoundException e) {
             sendError(exchange, 404, "SubTask not found");
         }
     }
@@ -59,7 +59,7 @@ public class SubTaskHandler extends BaseHttpHandler {
                 taskManager.updateSubTask(subTask);
                 sendJson(exchange, 201, subTask);
             }
-        } catch (Exeptions.NotAcceptableExeption e) {
+        } catch (NotAcceptableException e) {
             sendError(exchange, 406, "Not Acceptable");
         }
     }
