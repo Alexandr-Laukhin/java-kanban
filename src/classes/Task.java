@@ -1,5 +1,8 @@
 package classes;
 
+import classes.jsonAdapters.*;
+import com.google.gson.annotations.JsonAdapter;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -11,7 +14,11 @@ public class Task {
     protected String description;
     protected Status status = Status.NEW;
     protected int id;
+
+    @JsonAdapter(DurationAdapter.class)
     protected Duration duration;
+
+    @JsonAdapter(LocalDateTimeAdapter.class)
     protected LocalDateTime startTime;
 
     public Task(String name, String description) {

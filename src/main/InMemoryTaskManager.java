@@ -105,6 +105,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(prioritizedTasks);
+    }
+
+    @Override
     public void deleteTasks() {
         tasks.keySet().forEach(historyManager::remove);
         tasks.values().forEach(prioritizedTasks::remove);
@@ -331,7 +336,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     public boolean notIntersection(Task task1, Task task2) {
         if (task1.getStartTimeCheck().isPresent() && task2.getStartTimeCheck().isPresent()) {
-            // после написания nullsafe компаратора в prioritizedTasks появились задачи без startTime, поэтому сделал проверку на  null
             return task1.getStartTime().isAfter(getEndTime(task2)) || getEndTime(task1).isBefore(task2.getStartTime());
         } else {
             return false;

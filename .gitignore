@@ -1,1 +1,8 @@
 out/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+.DS_Store
