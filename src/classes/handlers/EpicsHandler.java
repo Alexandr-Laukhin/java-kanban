@@ -8,7 +8,6 @@ import main.TaskManager;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EpicsHandler extends BaseHttpHandler {
     public EpicsHandler(TaskManager taskManager) {
